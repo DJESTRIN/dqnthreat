@@ -1,0 +1,5 @@
+(1) Add in recording script
+(2) Add in the stress test
+(3) Test changing difficulty
+(4) Set-up sbatch calls 
+(5) 
