@@ -12,6 +12,7 @@ import torch.optim as optim
 from stable_baselines3.common.atari_wrappers import (ClipRewardEnv, EpisodicLifeEnv,FireResetEnv,MaxAndSkipEnv,NoopResetEnv)
 from stable_baselines3.common.buffers import ReplayBuffer
 from torch.utils.tensorboard import SummaryWriter
+from random import randrange
 
 
 def parse_args():
@@ -20,25 +21,26 @@ def parse_args():
     parser.add_argument("--exp-name", type=str, default=os.path.basename(__file__).rstrip(".py"),
         help="the name of this experiment")
     parser.add_argument("--difficulty", type=int, default=0,
-        help="seed of the experiment")
+        help="difficulty of the experiment")
     parser.add_argument("--seed", type=int, default=1,
         help="seed of the experiment")
     parser.add_argument("--torch-deterministic", type=lambda x: bool(strtobool(x)), default=True, nargs="?", const=True,
         help="if toggled, `torch.backends.cudnn.deterministic=False`")
     parser.add_argument("--cuda", type=lambda x: bool(strtobool(x)), default=True, nargs="?", const=True,
         help="if toggled, cuda will be enabled by default")
-    parser.add_argument("--track", type=lambda x: bool(strtobool(x)), default=False, nargs="?", const=True,
-        help="if toggled, this experiment will be tracked with Weights and Biases")
-
     parser.add_argument("--capture-video", type=lambda x: bool(strtobool(x)), default=False, nargs="?", const=True,
         help="whether to capture videos of the agent performances (check out `videos` folder)")
     parser.add_argument("--save-model", type=lambda x: bool(strtobool(x)), default=False, nargs="?", const=True,
         help="whether to save model into the `runs/{run_name}` folder")
-    parser.add_argument("--upload-model", type=lambda x: bool(strtobool(x)), default=False, nargs="?", const=True,
-        help="whether to upload the saved model to huggingface")
-    parser.add_argument("--hf-entity", type=str, default="",
-        help="the user or org name of the model repository from the Hugging Face Hub")
-   
+    parser.add_argument("--dropdirectory", type=str, required=True,
+        help="root directory for saving data/results")
+    parser.add_argument("--loadmodel", type=lambda x: bool(strtobool(x)), default=False, nargs="?", const=True,
+        help="if on, q network weights will be loaded")
+    parser.add_argument("--model_path", type=str, required=False,
+        help="Path to model weights. --loadmodel argument must be on")
+    parser.add_argument("--agenttype", type=str, required=True,
+        help="Type of agent to be run, normal DQN, junk-DQN or random choice agent")
+
     # Algorithm specific arguments
     parser.add_argument("--env-id", type=str, default="BreakoutNoFrameskip-v4",
         help="the id of the environment")
@@ -134,26 +136,24 @@ if __name__ == "__main__":
     import stable_baselines3 as sb3
 
     if sb3.__version__ < "2.0":
-        raise ValueError(
-            """On going migration: run the following command to install new dependencies
-        pip install "stable_baselines3==2.0.0a1" "gymnasium[atari,accept-rom-license]==0.28.1"  "ale-py==0.8.1"
-        """
-        )
+        raise ValueError("""On going migration: run the following command to install new dependencies
+        pip install "stable_baselines3==2.0.0a1" "gymnasium[atari,accept-rom-license]==0.28.1"  "ale-py==0.8.1" """)
     
     args = parse_args()
+    results_directory=args.dropdirectory
+    if results_directory[-1:]!='/':
+        results_directory+='/' # Make sure last value is a forward slash
     run_name = f"{args.env_id}__{args.exp_name}__{args.seed}__{int(time.time())}"
 
 
-    writer = SummaryWriter(f"runs/{run_name}")
-    writer.add_text(
-        "hyperparameters",
-        "|param|value|\n|-|-|\n%s" % ("\n".join([f"|{key}|{value}|" for key, value in vars(args).items()])),
-    )
+    writer = SummaryWriter([results_directory + f"runs/{run_name}"])
+    writer.add_text("hyperparameters","|param|value|\n|-|-|\n%s" % ("\n".join([f"|{key}|{value}|" for key, value in vars(args).items()])),)
 
+    # Set seed for all relevant packages
     random.seed(args.seed)
     np.random.seed(args.seed)
     torch.manual_seed(args.seed)
-    torch.backends.cudnn.deterministic = args.torch_deterministic
+    torch.backends.cudnn.deterministic = args.torch_deterministic 
 
     device = torch.device("cuda" if torch.cuda.is_available() and args.cuda else "cpu")
     print(device)
@@ -168,6 +168,11 @@ if __name__ == "__main__":
     target_network = QNetwork(envs).to(device)
     target_network.load_state_dict(q_network.state_dict())
 
+    if args.loadmodel:
+        """ If provided, will load neural network weights. """
+        q_network.load_state_dict(torch.load(args.model_path))
+        target_network.load_state_dict(torch.load(args.model_path))
+
     rb = ReplayBuffer(
         args.buffer_size,
         envs.single_observation_space,
@@ -179,6 +184,7 @@ if __name__ == "__main__":
     start_time = time.time()
 
     obs, _ = envs.reset(seed=args.seed)
+    all_rewards=[]
     for global_step in range(args.total_timesteps):
         epsilon = linear_schedule(args.start_e, args.end_e, args.exploration_fraction * args.total_timesteps, global_step)
         if random.random() < epsilon:
@@ -186,17 +192,29 @@ if __name__ == "__main__":
         else:
             q_values = q_network(torch.Tensor(obs).to(device))
             actions = torch.argmax(q_values, dim=1).cpu().numpy()
+            
+        # Set random action for random agents
+        if args.agenttype=="random":
+            actions = np.array([envs.single_action_space.sample() for _ in range(envs.num_envs)])
 
         next_obs, rewards, terminated, truncated, infos = envs.step(actions)
-
+        
+        # Save real reward value at end of each episode
+        if terminated:
+            all_rewards.append(rewards)
+            
+        # Set random reward for junk agents    
+        if args.agenttype=='junk':
+            rewards=randrange(10)
+        
         if "final_info" in infos:
             for info in infos["final_info"]:
                 if "episode" not in info:
                     continue
                 print(f"global_step={global_step}, episodic_return={info['episode']['r']}")
-                writer.add_scalar("charts/episodic_return", info["episode"]["r"], global_step)
-                writer.add_scalar("charts/episode_length", info["episode"]["l"], global_step)
-                writer.add_scalar("charts/epsilon", epsilon, global_step)
+                writer.add_scalar([results_directory + "charts/episodic_return"], info["episode"]["r"], global_step)
+                writer.add_scalar([results_directory + "charts/episode_length"], info["episode"]["l"], global_step)
+                writer.add_scalar([results_directory + "charts/epsilon"], epsilon, global_step)
 
         real_next_obs = next_obs.copy()
         for idx, d in enumerate(truncated):
@@ -216,10 +234,10 @@ if __name__ == "__main__":
                 loss = F.mse_loss(td_target, old_val)
 
                 if global_step % 100 == 0:
-                    writer.add_scalar("losses/td_loss", loss, global_step)
-                    writer.add_scalar("losses/q_values", old_val.mean().item(), global_step)
+                    writer.add_scalar([results_directory + "losses/td_loss"], loss, global_step)
+                    writer.add_scalar([results_directory + "losses/q_values"], old_val.mean().item(), global_step)
                     print("SPS:", int(global_step / (time.time() - start_time)))
-                    writer.add_scalar("charts/SPS", int(global_step / (time.time() - start_time)), global_step)
+                    writer.add_scalar([results_directory + "charts/SPS"], int(global_step / (time.time() - start_time)), global_step)
 
                 optimizer.zero_grad()
                 loss.backward()
@@ -227,12 +245,15 @@ if __name__ == "__main__":
 
             if global_step % args.target_network_frequency == 0:
                 for target_network_param, q_network_param in zip(target_network.parameters(), q_network.parameters()):
-                    target_network_param.data.copy_(
-                        args.tau * q_network_param.data + (1.0 - args.tau) * target_network_param.data
-                    )
+                    target_network_param.data.copy_(args.tau * q_network_param.data + (1.0 - args.tau) * target_network_param.data)
 
+    # Save list of reward values as numpy array
+    all_rewards=np.asarray(all_rewards)
+    filename=results_directory + 'allrewards.npy'
+    np.save(filename,all_rewards)
+    
     if args.save_model:
-        model_path = f"runs/{run_name}/{args.exp_name}.pth"
+        model_path = results_directory + f"runs/{run_name}/{args.exp_name}.pth"
         torch.save(q_network.state_dict(), model_path)
         print(f"model saved to {model_path}")
 
@@ -250,8 +271,7 @@ if __name__ == "__main__":
         )
 
         for idx, episodic_return in enumerate(episodic_returns):
-            writer.add_scalar("eval/episodic_return", episodic_return, idx)
-
+            writer.add_scalar([results_directory +"eval/episodic_return"], episodic_return, idx)
 
     envs.close()
     writer.close()

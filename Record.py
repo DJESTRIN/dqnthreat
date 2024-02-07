@@ -10,10 +10,13 @@ import csv
 from PIL import Image
 import pandas as pd
 from collections import defaultdict
+import subprocess
 
 class Record():
-    def __init__(self,seed,output_dir):
+    def __init__(self,seed,output_dir,run_ilastik_file,ilastik_project):
         self.seed=seed
+        self.run_ilastik_file=run_ilastik_file
+        self.project_file=ilastik_project
         
         output_dir = output_dir+'/model_data/'
         if not os.path.exists(output_dir):
@@ -25,7 +28,6 @@ class Record():
             os.remove(file)
             
         self.output_dir=output_dir
-
         self.imageCounter = 0
         
     def grab_w_n_b(self,agent,episode):
@@ -97,11 +99,29 @@ class Record():
             writer = csv.writer(file)
             writer.writerow(layerList)
             
-    def recordObservation(self, observation, episode):
+    def record_observation(self, observation, episode):
         path = f'{self.output_dir}/Episode{episode}'
         if not os.path.exists(path):
             os.mkdir(path)
-        Image.fromarray(observation).save(f'{path}/Image{self.imageCounter}.png')
+        self.current_imagefilename=f'{path}/Image{self.imageCounter}.png'
+        Image.fromarray(observation).save(self.current_imagefilename)
+        self.segment_observation(self)
+        
+    def segment_observation(self):
+        """ Run ilastik on current image via subprocess command """
+        project_file='--project='+self.project_file
+        image_file='--raw_data='+self.current_imagefilename
+        subprocess.run([self.run_ilastik_file,'--headless','--output_format=numpy',project_file,image_file])
+        self.classify_observation(self)
+        
+    def classify_observation(self):
+        """ Determine whether threat is in current frame """
+        if self.game_name == "ALE/SpaceInvaders-v5":
+            
+        elif self.game_name=="ALE/":
+            
+        else:
+            raise TypeError("Game does not match ilastik file")
     
     def buildDF(self):
         # Organizes each folder by its layer name
