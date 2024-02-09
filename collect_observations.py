@@ -23,8 +23,6 @@ def parse_args():
         help="the id of the environment")
     args = parser.parse_args()
     # fmt: on
-    assert args.num_envs == 1, "vectorized envs are not supported at the moment"
-
     return args
 
 def make_env(env_id, seed, idx, capture_video, run_name, difficulty):
@@ -44,7 +42,7 @@ def make_env(env_id, seed, idx, capture_video, run_name, difficulty):
             env = FireResetEnv(env)
         
         env = ClipRewardEnv(env)
-        env = gym.wrappers.ResizeObservation(env, (84, 84))
+        env = gym.wrappers.ResizeObservation(env, (200, 200))
         env = gym.wrappers.GrayScaleObservation(env)
         env = gym.wrappers.FrameStack(env, 4)
         env.action_space.seed(seed)
@@ -71,7 +69,11 @@ if __name__ == "__main__":
         actions = np.array([envs.single_action_space.sample() for _ in range(1)])
         next_obs, rewards, terminated, truncated, infos = envs.step(actions)
         current_imagefilename=f'{args.dropdirectory}/Image{global_step}.png'
+        next_obs=np.asarray(next_obs)
+        next_obs=next_obs[:,3,:,:]
+        next_obs=np.reshape(next_obs,(200,200))
         Image.fromarray(next_obs).save(current_imagefilename)
+        print(global_step)
         
     envs.close()
     

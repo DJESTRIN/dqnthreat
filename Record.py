@@ -1,6 +1,14 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 """
+Record
+Used to save recordings of weights, biases and neural activity as agents progress into environment
+
+Final Data Frame Layout:
+
+AgentID Episode Step LayerID NeuronID WeightID ThreatBoolean NeuronalActivityValue NeuronalBiasValue WeightValue 
+1234,1,1,fc1,1,1,0,7.02,1,0.001     
+1234,1,1,fc1,1,2,0,7.02,1,0.002
 
 """
 import ipdb
@@ -115,13 +123,19 @@ class Record():
         self.classify_observation(self)
         
     def classify_observation(self):
-        """ Determine whether threat is in current frame """
-        if self.game_name == "ALE/SpaceInvaders-v5":
-            
-        elif self.game_name=="ALE/":
-            
+        """ Determine whether threat is in current frame """  
+        if self.game_name=="ALE/DemonAttack-v5":
+           #inport ilastik segmented numpy file
+           segmentation=np.load(self.run_ilastik_file)
+           
+           # If 
+           ipdb.set_trace()
+           ThreatBoolean=0
+
         else:
             raise TypeError("Game does not match ilastik file")
+            
+        return ThreatBoolean
     
     def buildDF(self):
         # Organizes each folder by its layer name
