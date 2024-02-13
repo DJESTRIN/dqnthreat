@@ -1,7 +1,9 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 """
-
+Record Neural Network
+(1) Collects NN activations,weights and biases. 
+(2) Applies ilastik pixel classification to classify observation
 """
 import ipdb
 import numpy as np
@@ -10,6 +12,9 @@ import csv
 from PIL import Image
 import pandas as pd
 from collections import defaultdict
+import subprocess
+import time
+import glob
 
 # Super Logger is a class to manage ActivationLoggers
 class SuperLogger():
@@ -202,8 +207,31 @@ class Record():
             
         return df
 
+class AnalyzeObservation():
+    def __init__(self,ilastik_dir,ilp_file,output_dir):
+        self.ilastik_dir=ilastik_dir
+        self.ilp_file=ilp_file
+        self.output_dir=output_dir
+    
+    def __call__(self, observation):
+        """ Get relevant data from observation """
+        # Create temp folder. 
+        tmppath=f'{self.output_dir}/ilastiktmp/'
+        if not os.path.exists(tmppath):
+            os.mkdir(tmppath)
+        
+        # Save current image
+        timestr = time.strftime("%Y%m%d-%H%M%S")    # Provide unique key 
+        image_file=f'{tmppath}/ImageOH{timestr}.png'
+        Image.fromarray(observation).save(image_file)
 
+        # Build ilastik command
+        command = f'{self.ilastik_dir} --headless --project={self.ilp_file} --export_source="Probabilities" --output_format=numpy {image_file}'
+        subprocess.call(command, shell=True)
 
+        # Load numpy file
+        glob.glob()
+    
 
 # To do --> 
     # Need weights at end of every episode for every neuron along with biases
