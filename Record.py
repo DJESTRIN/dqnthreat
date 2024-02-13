@@ -92,20 +92,19 @@ class AnalyzeObservation():
             raise TypeError("Multiple numpy files found, analysis will be wrong")
 
         npfile=files[0]
-        np.load(npfile)
+        array = np.load(npfile)
 
-        # Delete image and corresponding numpy file
+        # Parse the numpy array
+        threat_boolean, threat_distance = self.parsesegmentation(array)
+
+        # garbage collection: delete image and corresponding numpy file
         os.remove(image_file)
         os.remove(npfile)
 
-
+        #calculate execution time
         end_time = time.time()
         execution_time = end_time - start_time
         print(f"Execution time: {execution_time:.3f} seconds")
-
-        # Final outputs of class
-        threat_boolean=0
-        threat_distance=np.nan
         return threat_boolean, threat_distance 
 
     def parsesegmentation(self,array):
@@ -115,6 +114,7 @@ class AnalyzeObservation():
 
         elif "SpaceInvaders-v5" in self.ilp_file:
             threat=array[:,:,0]
+        return threat_boolean, threat_distance
 
 
     def distance(self,Px,Py,Qx,Qy):
@@ -189,7 +189,6 @@ class Record():
         threat_boolean,threat_distance = self.threat_detector(self.observation)
 
         # module is essentially the layer
-
         # Keeps track of layer name and description to add to top of csv
         layerList = []
         outputPath=self.output_dir+'/'+'activations'+'.csv'
