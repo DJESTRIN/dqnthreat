@@ -7,14 +7,14 @@ Record Neural Network
 """
 import ipdb
 import numpy as np
-import os,glob
+import os, glob
 import csv
 from PIL import Image
 import pandas as pd
 from collections import defaultdict
 import subprocess
 import time
-import glob
+import math
 
 # Super Logger is a class to manage ActivationLoggers
 class SuperLogger():
@@ -56,6 +56,57 @@ class ActivationLogger:
     def __call__(self, module, input, output):
             self.output = output.tolist()
             self.superLogger.checkAddToCSV()
+
+# Analyze Observation, pulls relevant data from current observation for data frame             
+class AnalyzeObservation():
+    def __init__(self,ilastik_dir,ilp_file,output_dir):
+        self.ilastik_dir=ilastik_dir
+        self.ilp_file=ilp_file
+        self.output_dir=output_dir
+    
+    def __call__(self, observation):
+        """ Get relevant data from observation
+         cite: https://www.ilastik.org/documentation/basics/headless """
+        # Create temp folder. 
+        tmppath=f'{self.output_dir}/ilastiktmp/'
+        if not os.path.exists(tmppath):
+            os.mkdir(tmppath)
+        
+        # Save current image
+        timestr = time.strftime("%Y%m%d-%H%M%S")    # Provide unique key 
+        image_file=f'{tmppath}/ImageOH{timestr}.png'
+        Image.fromarray(observation).save(image_file)
+
+        # Build ilastik command
+        command = f'{self.ilastik_dir} --headless --project={self.ilp_file} --export_source="Probabilities" --output_format=numpy {image_file}'
+        subprocess.call(command, shell=True)
+
+        # Load numpy file
+        files=glob.glob(f'{tmppath}/*.npy')
+
+        if len(files)>2: # Only a single numpy file should be in the temporary directory at a time
+            raise TypeError("Multiple numpy files found, analysis will be wrong")
+
+        npfile=files[0]
+        np.load(npfile)
+
+        # Delete image and corresponding numpy file
+        os.remove(image_file)
+        os.remove(npfile)
+
+    def parsesegmentation(self,array):
+        """ Calculate the presence of threat. Then calculate agent distance from threat """
+        if "DemonAttack-v5" in self.ilp_file:
+            threat=array[:,:,0]
+
+        elif "SpaceInvaders-v5" in self.ilp_file:
+            threat=array[:,:,0]
+
+
+    def distance(self,Px,Py,Qx,Qy):
+        """ Get distance. Cite: https://www.geeksforgeeks.org/python-math-dist-method/ """
+        return math.dist([Px,Py],[Qx,Qy])
+    
 
 class Record():
     def __init__(self,seed,output_dir):
@@ -206,33 +257,7 @@ class Record():
             df.drop(columns=[col], inplace=True)
             
         return df
-
-class AnalyzeObservation():
-    def __init__(self,ilastik_dir,ilp_file,output_dir):
-        self.ilastik_dir=ilastik_dir
-        self.ilp_file=ilp_file
-        self.output_dir=output_dir
-    
-    def __call__(self, observation):
-        """ Get relevant data from observation """
-        # Create temp folder. 
-        tmppath=f'{self.output_dir}/ilastiktmp/'
-        if not os.path.exists(tmppath):
-            os.mkdir(tmppath)
-        
-        # Save current image
-        timestr = time.strftime("%Y%m%d-%H%M%S")    # Provide unique key 
-        image_file=f'{tmppath}/ImageOH{timestr}.png'
-        Image.fromarray(observation).save(image_file)
-
-        # Build ilastik command
-        command = f'{self.ilastik_dir} --headless --project={self.ilp_file} --export_source="Probabilities" --output_format=numpy {image_file}'
-        subprocess.call(command, shell=True)
-
-        # Load numpy file
-        glob.glob()
-    
-
+   
 # To do --> 
     # Need weights at end of every episode for every neuron along with biases
     # Need recording of activity for each neuron to determien whether neuron is activated by threat
