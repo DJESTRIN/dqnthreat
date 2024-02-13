@@ -1,14 +1,6 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 """
-Record
-Used to save recordings of weights, biases and neural activity as agents progress into environment
-
-Final Data Frame Layout:
-
-AgentID Episode Step LayerID NeuronID WeightID ThreatBoolean NeuronalActivityValue NeuronalBiasValue WeightValue 
-1234,1,1,fc1,1,1,0,7.02,1,0.001     
-1234,1,1,fc1,1,2,0,7.02,1,0.002
 
 """
 import ipdb
@@ -18,13 +10,51 @@ import csv
 from PIL import Image
 import pandas as pd
 from collections import defaultdict
-import subprocess
+
+# Super Logger is a class to manage ActivationLoggers
+class SuperLogger():
+    # Holds a list of loggers, and uses the outputs to create a list to place into a csv
+    def __init__(self, csvFilePath):
+        self.loggers = []
+        self.csvFilePath = csvFilePath
+    
+    # addLogger returns the logger, allowing us to directly register the hook 
+    def addLogger(self):
+        logger = ActivationLogger(self)
+        self.loggers.append(logger)
+        return logger
+    
+    def checkAddToCSV(self):
+        # If all loggers have an output, we can place into the csv
+        # After placing into csv, we can reset all outputs
+        newRow = []
+        for logger in self.loggers:
+            if logger.output == None:
+                return
+            else:
+                newRow.append(logger.output)
+        with open(self.csvFilePath, 'a') as file:
+            writer = csv.writer(file)
+            writer.writerow(newRow)
+            self.setAllLoggers(None)
+
+    def setAllLoggers(self, value):
+        for logger in self.loggers:
+            logger.output = value
+        
+# Activation Logger allows us to hold onto the output value
+class ActivationLogger:
+    def __init__(self, superLogger):
+        self.superLogger = superLogger
+        self.output = None
+
+    def __call__(self, module, input, output):
+            self.output = output.tolist()
+            self.superLogger.checkAddToCSV()
 
 class Record():
-    def __init__(self,seed,output_dir,run_ilastik_file,ilastik_project):
+    def __init__(self,seed,output_dir):
         self.seed=seed
-        self.run_ilastik_file=run_ilastik_file
-        self.project_file=ilastik_project
         
         output_dir = output_dir+'/model_data/'
         if not os.path.exists(output_dir):
@@ -36,7 +66,12 @@ class Record():
             os.remove(file)
             
         self.output_dir=output_dir
+
         self.imageCounter = 0
+
+        self.activationHookFiles = []
+
+        self.superLogger = None
         
     def grab_w_n_b(self,agent,episode):
         """ Saves weight and bias information for each agent as a npy file """
@@ -73,69 +108,31 @@ class Record():
             output_name=folder+'/concat.npy'
             np.save(output_name,fmat)
 
-    def activation_hook(self, agent, input, output):
-        """ Save neural activity 
-        Parameters
-        ----------
-        inst : torch.nn.Module
-            The layer we want to attach the hook to.
-        inp : tuple of torch.Tensor
-            The input to the `forward` method.
-        out : torch.Tensor
-            The output of the `forward` method.
-        """
-        output_name=self.output_dir+'/'+'activations'+'.csv'
-        with open(output_name, 'a', newline='') as file:
-            writer = csv.writer(file)
-            writer.writerow(output.tolist())
-        print("This is working!")
-        
-
     def add_activation_hook(self, agent):
         # module is essentially the layer
-        layerList = []
-        for name, module in agent.named_modules():
-            module.register_forward_hook(self.activation_hook)
-            layerList.append(name)
-            print(f"The name is:{name} and the module is {module}")
 
-        output_name=self.output_dir+'/'+'activations'+'.csv'
+        # Keeps track of layer name and description to add to top of csv
+        layerList = []
+        outputPath=self.output_dir+'/'+'activations'+'.csv'
+        self.superLogger = SuperLogger(outputPath)
+        
+        # superLogger will add loggers in correct order
+        for name, module in agent.named_modules():
+            name = name if name != "" else "no_name_network"
+            module.register_forward_hook(self.superLogger.addLogger())
+            layerList.append(name)
         
         # Adding first row with layer names
         # I chose w to reset the file
-        with open(output_name, 'w', newline='') as file:
+        with open(outputPath, 'w', newline='') as file:
             writer = csv.writer(file)
             writer.writerow(layerList)
             
-    def record_observation(self, observation, episode):
+    def recordObservation(self, observation, episode):
         path = f'{self.output_dir}/Episode{episode}'
         if not os.path.exists(path):
             os.mkdir(path)
-        self.current_imagefilename=f'{path}/Image{self.imageCounter}.png'
-        Image.fromarray(observation).save(self.current_imagefilename)
-        self.segment_observation(self)
-        
-    def segment_observation(self):
-        """ Run ilastik on current image via subprocess command """
-        project_file='--project='+self.project_file
-        image_file='--raw_data='+self.current_imagefilename
-        subprocess.run([self.run_ilastik_file,'--headless','--output_format=numpy',project_file,image_file])
-        self.classify_observation(self)
-        
-    def classify_observation(self):
-        """ Determine whether threat is in current frame """  
-        if self.game_name=="ALE/DemonAttack-v5":
-           #inport ilastik segmented numpy file
-           segmentation=np.load(self.run_ilastik_file)
-           
-           # If 
-           ipdb.set_trace()
-           ThreatBoolean=0
-
-        else:
-            raise TypeError("Game does not match ilastik file")
-            
-        return ThreatBoolean
+        Image.fromarray(observation).save(f'{path}/Image{self.imageCounter}.png')
     
     def buildDF(self):
         # Organizes each folder by its layer name
@@ -182,6 +179,32 @@ class Record():
             df = pd.concat([df, df2])
         return df
     
+    def activationHookDF(filepath):
+        df = pd.read_csv(filepath)
+
+        # By default, all of the "numpy" values in the dataframe have an additional dimension
+        # e.g. an array of 9 elements is (1,9)
+        # We can squeeze it
+        
+        # The first column is generally the index, so we can remove it
+        orig_columns = df.columns[1:]
+
+        # Converts string array into numpy, and removes dimension
+        df[orig_columns] = df[orig_columns].applymap(lambda x: np.squeeze(np.array(eval(x)), axis=0))
+        
+
+        for col in orig_columns:
+            # We can use the shape of the first element as reference for all elements in the Series
+            for i in range(df[col].iloc[0].shape[0]):
+                df[f"{col}_{i}"] = df[col].apply(lambda x: x[i])
+
+            df.drop(columns=[col], inplace=True)
+            
+        return df
+
+
+
+
 # To do --> 
     # Need weights at end of every episode for every neuron along with biases
     # Need recording of activity for each neuron to determien whether neuron is activated by threat
