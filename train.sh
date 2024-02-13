@@ -10,8 +10,10 @@ agent_name=$5
 source ~/.bashrc
 conda activate ataridqn
 
-#Run the difficulty test
+model_directory=$output_directory/runs/${agent_name}_${seed}/${agent_name}.pth
+echo $model_directory
 
+#Run the difficulty test
 # Train Agent on Easy
 python3 dqn_atari_stripped.py \
 	--seed $seed \
@@ -36,4 +38,6 @@ python3 dqn_atari_stripped.py \
         --env-id $atari_game \
         --agenttype $agent_type \
         --buffer-size 400000 \
+        --load_model \
+        --model_path $model_directory \
         --save-model
