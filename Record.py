@@ -67,6 +67,10 @@ class AnalyzeObservation():
     def __call__(self, observation):
         """ Get relevant data from observation
          cite: https://www.ilastik.org/documentation/basics/headless """
+
+        # Clock time to determine code effeciency -- are calls to ilastik too slow?
+        start_time = time.time()
+
         # Create temp folder. 
         tmppath=f'{self.output_dir}/ilastiktmp/'
         if not os.path.exists(tmppath):
@@ -94,6 +98,16 @@ class AnalyzeObservation():
         os.remove(image_file)
         os.remove(npfile)
 
+
+        end_time = time.time()
+        execution_time = end_time - start_time
+        print(f"Execution time: {execution_time:.3f} seconds")
+
+        # Final outputs of class
+        threat_boolean=0
+        threat_distance=np.nan
+        return threat_boolean, threat_distance 
+
     def parsesegmentation(self,array):
         """ Calculate the presence of threat. Then calculate agent distance from threat """
         if "DemonAttack-v5" in self.ilp_file:
@@ -109,7 +123,7 @@ class AnalyzeObservation():
     
 
 class Record():
-    def __init__(self,seed,output_dir):
+    def __init__(self,seed,output_dir,ilastik_dir,ilp_file):
         self.seed=seed
         
         output_dir = output_dir+'/model_data/'
@@ -128,6 +142,9 @@ class Record():
         self.activationHookFiles = []
 
         self.superLogger = None
+
+        # created threat detector object. Call threat_detector(observation) which returns threat_detected (boolean) and threat_distance (float or np.nan)
+        self.threat_detector=AnalyzeObservation(ilastik_dir,ilp_file,output_dir)
         
     def grab_w_n_b(self,agent,episode):
         """ Saves weight and bias information for each agent as a npy file """
@@ -164,7 +181,13 @@ class Record():
             output_name=folder+'/concat.npy'
             np.save(output_name,fmat)
 
+    def get_observation(self,observation):
+        self.observation=observation
+
     def add_activation_hook(self, agent):
+        # Get relevant threat information from observation
+        threat_boolean,threat_distance = self.threat_detector(self.observation)
+
         # module is essentially the layer
 
         # Keeps track of layer name and description to add to top of csv
@@ -184,12 +207,6 @@ class Record():
             writer = csv.writer(file)
             writer.writerow(layerList)
             
-    def recordObservation(self, observation, episode):
-        path = f'{self.output_dir}/Episode{episode}'
-        if not os.path.exists(path):
-            os.mkdir(path)
-        Image.fromarray(observation).save(f'{path}/Image{self.imageCounter}.png')
-    
     def buildDF(self):
         # Organizes each folder by its layer name
         # This assumes that each folder is named by "layer_bias" or "layer_weight"
@@ -247,7 +264,6 @@ class Record():
 
         # Converts string array into numpy, and removes dimension
         df[orig_columns] = df[orig_columns].applymap(lambda x: np.squeeze(np.array(eval(x)), axis=0))
-        
 
         for col in orig_columns:
             # We can use the shape of the first element as reference for all elements in the Series
@@ -257,8 +273,3 @@ class Record():
             df.drop(columns=[col], inplace=True)
             
         return df
-   
-# To do --> 
-    # Need weights at end of every episode for every neuron along with biases
-    # Need recording of activity for each neuron to determien whether neuron is activated by threat
-    #   Need Image at same time to determine when "threat" is present.

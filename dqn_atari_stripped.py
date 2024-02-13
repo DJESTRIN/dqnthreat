@@ -171,7 +171,7 @@ if __name__ == "__main__":
     target_network.load_state_dict(q_network.state_dict())
 
     record.add_activation_hook(q_network)
-    
+
     if args.loadmodel:
         """ If provided, will load neural network weights. """
         q_network.load_state_dict(torch.load(args.model_path))
@@ -188,6 +188,8 @@ if __name__ == "__main__":
     start_time = time.time()
 
     obs, _ = envs.reset(seed=args.seed)
+    record.get_observation(obs)
+
     all_rewards=[]
     for global_step in range(args.total_timesteps):
         epsilon = linear_schedule(args.start_e, args.end_e, args.exploration_fraction * args.total_timesteps, global_step)
@@ -202,7 +204,8 @@ if __name__ == "__main__":
             actions = np.array([envs.single_action_space.sample() for _ in range(envs.num_envs)])
 
         next_obs, rewards, terminated, truncated, infos = envs.step(actions)
-        
+        record.get_observation(next_obs)
+
         # Save real reward value at end of each episode
         if terminated:
             all_rewards.append(rewards)
