@@ -13,7 +13,7 @@ from stable_baselines3.common.atari_wrappers import (ClipRewardEnv, EpisodicLife
 from stable_baselines3.common.buffers import ReplayBuffer
 from torch.utils.tensorboard import SummaryWriter
 from random import randrange
-import Record
+#import Record
 
 
 def parse_args():
@@ -155,7 +155,7 @@ if __name__ == "__main__":
     np.random.seed(args.seed)
     torch.manual_seed(args.seed)
     torch.backends.cudnn.deterministic = args.torch_deterministic 
-    record = Record.Record(args.seed, 'recordOutputs')
+    #record = Record.Record(args.seed, 'recordOutputs')
 
     device = torch.device("cuda" if torch.cuda.is_available() and args.cuda else "cpu")
     print(device)
@@ -170,7 +170,7 @@ if __name__ == "__main__":
     target_network = QNetwork(envs).to(device)
     target_network.load_state_dict(q_network.state_dict())
 
-    record.add_activation_hook(q_network)
+    #record.add_activation_hook(q_network)
 
     if args.loadmodel:
         """ If provided, will load neural network weights. """
@@ -188,7 +188,7 @@ if __name__ == "__main__":
     start_time = time.time()
 
     obs, _ = envs.reset(seed=args.seed)
-    record.get_observation(obs)
+    #record.get_observation(obs)
 
     all_rewards=[]
     for global_step in range(args.total_timesteps):
@@ -204,7 +204,7 @@ if __name__ == "__main__":
             actions = np.array([envs.single_action_space.sample() for _ in range(envs.num_envs)])
 
         next_obs, rewards, terminated, truncated, infos = envs.step(actions)
-        record.get_observation(next_obs)
+        #record.get_observation(next_obs)
 
         # Save real reward value at end of each episode
         if terminated:
