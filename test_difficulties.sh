@@ -11,7 +11,6 @@ do
         --dropdirectory $output_directory \
         --exp-name easy$RANDOMSEED \
         --difficulty 0 \
-        --track \
         --capture-video \
         --env-id ALE/SpaceInvaders-v5 \
         --agenttype vanilla \
@@ -29,7 +28,6 @@ do
         --dropdirectory $output_directory \
         --exp-name easy$RANDOMSEED \
         --difficulty 1 \
-        --track \
         --capture-video \
         --env-id ALE/SpaceInvaders-v5 \
         --agenttype vanilla \
