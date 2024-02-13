@@ -3,10 +3,16 @@ for i in {1..10}
 do
     CURRENTEPOCTIME=`date +%s`
     RANDOMSEED=$(($CURRENTEPOCTIME + $i))
-    sbatch --job-name=DQN_test \
-	--mem=30G \
-	--partition=scu-cpu \
-	--mail-type=BEGIN,END,FAIL \
-	--mail-user=dje4001@med.cornell.edu,anp4047@med.cornell.edu \
-	--wrap="bash train.sh $RANDOMSEED $OUTPUTDIR ALE/SpaceInvaders-v5 vanilla $RANDOMSEED"
+    python3 dqn_atari_stripped.py \
+        --seed $seed \
+        --dropdirectory $output_directory \
+        --exp-name $agent_name \
+        --difficulty 0 \
+        --track \
+        --capture-video \
+        --env-id $atari_game \
+        --agenttype $agent_type \
+        --buffer-size 400000 \
+        --save-model
+
 done
