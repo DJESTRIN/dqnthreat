@@ -63,6 +63,62 @@ class AnalyzeObservation():
         self.ilastik_dir=ilastik_dir
         self.ilp_file=ilp_file
         self.output_dir=output_dir
+
+    def parsesegmentation(self,array):
+        """ Calculate the presence of threat. Then calculate agent distance from threat
+        (1) Background -- image data not relevant
+        (2) Agent -- the origin of the agent that is in environment
+        (3) Enemy -- the competitor which produces an attack 
+        (4) Attack -- the mechanism by which agent dies if touched (eg. bullet, sword, etc)
+        """
+        if array.shape[2]<4:
+            raise TypeError("ilastik numpy output should have 4 slices")
+
+        #Binerize array based on threshold 0.9
+        array[array<0.9]=0
+        array[array>0.9]=1
+
+        #Parse out important variables
+        background=array[:,:,0]
+        agent=array[:,:,1]
+        enemy=array[:,:,2]
+        attack=array[:,:,3]
+
+        # Boolean values whether enemy or attack are present in observation
+        enemy_boolean = np.sum(enemy)>0
+        attack_boolean = np.sum(attack)>0
+        agent_boolean = np.sum(agent)>0
+
+        # Calculate distances
+        # distance between enemy and agent 
+        if agent_boolean:
+            y_agent,x_agent=np.where(agent==1)
+            y_agent,x_agent=np.mean(y_agent),np.mean(x_agent) #average coordinate of agent
+
+        if enemy_boolean and agent_boolean:
+            y_enemy,x_enemy=np.where(enemy==1)
+            y_enemy,x_enemy=np.mean(y_enemy),np.mean(x_enemy) #average coordinate of enemy
+
+            # Calculate distance between agent and enemy
+            enemy_distance = self.distance(x_agent,y_agent,x_enemy,y_enemy)
+        else:
+            enemy_distance = np.nan
+
+        # distance between attack and agent
+        if attack_boolean and agent_boolean:
+            y_attack,x_attack=np.where(attack==1)
+            y_attack,x_attack=np.mean(y_attack),np.mean(x_attack) #average coordinate of enemy
+
+            # Calculate distance between agent and enemy
+            attack_distance = self.distance(x_agent,y_agent,x_attack,y_attack)
+        else:
+            attack_distance = np.nan
+
+        return enemy_boolean, attack_boolean, agent_boolean, enemy_distance, attack_distance
+
+    def distance(self,Px,Py,Qx,Qy):
+        """ Get distance. Cite: https://www.geeksforgeeks.org/python-math-dist-method/ """
+        return math.dist([Px,Py],[Qx,Qy])
     
     def __call__(self, observation):
         """ Get relevant data from observation
@@ -95,7 +151,7 @@ class AnalyzeObservation():
         array = np.load(npfile)
 
         # Parse the numpy array
-        threat_boolean, threat_distance = self.parsesegmentation(array)
+        enemy_boolean, attack_boolean, agent_boolean, enemy_distance, attack_distance = self.parsesegmentation(array)
 
         # garbage collection: delete image and corresponding numpy file
         os.remove(image_file)
@@ -105,66 +161,7 @@ class AnalyzeObservation():
         end_time = time.time()
         execution_time = end_time - start_time
         print(f"Execution time: {execution_time:.3f} seconds")
-        return threat_boolean, threat_distance 
-
-    def parsesegmentation(self,array):
-        """ Calculate the presence of threat. Then calculate agent distance from threat
-         (1) Background -- image data not relevant
-         (2) Agent -- the origin of the agent that is in environment
-         (3) Enemy -- the competitor which produces an attack 
-         (4) Attack -- the mechanism by which agent dies if touched (eg. bullet, sword, etc)
-         """
-        if array.shape[2]<4:
-            raise TypeError("ilastik numpy output should have 4 slices")
-
-        #Binerize array based on threshold 0.9
-        array[array<0.9]=0
-        array[array>0.9]=1
-
-        #Parse out important variables
-        background=array[:,:,0]
-        agent=array[:,:,1]
-        enemy=array[:,:,2]
-        attack=array[:,:,3]
-
-        # Boolean values whether enemy or attack are present in observation
-        enemy_boolean = np.sum(enemy)>0
-        attack_boolean = np.sum(attack)>0
-        agent_boolean = np.sum(agent)>0
-
-        # Calculate distances
-        # distance between enemy and agent 
-        if agent_boolean:
-            y_agent,x_agent=np.where(agent==1)
-            y_agent,x_agent=np.mean(y_agent),np.mean(x_agent) #average coordinate of agent
-
-
-        if enemy_boolean and agent_boolean:
-            y_enemy,x_enemy=np.where(enemy==1)
-            y_enemy,x_enemy=np.mean(y_enemy),np.mean(x_enemy) #average coordinate of enemy
-
-            # Calculate distance between agent and enemy
-            enemy_distance = self.distance(x_agent,y_agent,x_enemy,y_enemy)
-        else:
-            enemy_distance = np.nan
-
-        # distance between attack and agent
-        if attack_boolean and agent_boolean:
-            y_attack,x_attack=np.where(attack==1)
-            y_attack,x_attack=np.mean(y_attack),np.mean(x_attack) #average coordinate of enemy
-
-            # Calculate distance between agent and enemy
-            attack_distance = self.distance(x_agent,y_agent,x_attack,y_attack)
-        else:
-            attack_distance = np.nan
-
-        return enemy_boolean, attack_boolean, agent_boolean, enemy_distance, attack_distance
-
-
-    def distance(self,Px,Py,Qx,Qy):
-        """ Get distance. Cite: https://www.geeksforgeeks.org/python-math-dist-method/ """
-        return math.dist([Px,Py],[Qx,Qy])
-    
+        return enemy_boolean, attack_boolean, agent_boolean, enemy_distance, attack_distance   
 
 class Record():
     def __init__(self,seed,output_dir,ilastik_dir,ilp_file):
@@ -187,7 +184,8 @@ class Record():
 
         self.superLogger = None
 
-        # created threat detector object. Call threat_detector(observation) which returns threat_detected (boolean) and threat_distance (float or np.nan)
+        # created threat detector object. 
+        # Call threat_detector(observation) which returns threat_detected (boolean) and threat_distance (float or np.nan) 
         self.threat_detector=AnalyzeObservation(ilastik_dir,ilp_file,output_dir)
         
     def grab_w_n_b(self,agent,episode):
@@ -295,7 +293,6 @@ class Record():
     
     def activationHookDF(filepath):
         df = pd.read_csv(filepath)
-
         # By default, all of the "numpy" values in the dataframe have an additional dimension
         # e.g. an array of 9 elements is (1,9)
         # We can squeeze it
