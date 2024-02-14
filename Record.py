@@ -108,13 +108,58 @@ class AnalyzeObservation():
         return threat_boolean, threat_distance 
 
     def parsesegmentation(self,array):
-        """ Calculate the presence of threat. Then calculate agent distance from threat """
-        if "DemonAttack-v5" in self.ilp_file:
-            threat=array[:,:,0]
+        """ Calculate the presence of threat. Then calculate agent distance from threat
+         (1) Background -- image data not relevant
+         (2) Agent -- the origin of the agent that is in environment
+         (3) Enemy -- the competitor which produces an attack 
+         (4) Attack -- the mechanism by which agent dies if touched (eg. bullet, sword, etc)
+         """
+        if array.shape[2]<4:
+            raise TypeError("ilastik numpy output should have 4 slices")
 
-        elif "SpaceInvaders-v5" in self.ilp_file:
-            threat=array[:,:,0]
-        return threat_boolean, threat_distance
+        #Binerize array based on threshold 0.9
+        array[array<0.9]=0
+        array[array>0.9]=1
+
+        #Parse out important variables
+        background=array[:,:,0]
+        agent=array[:,:,1]
+        enemy=array[:,:,2]
+        attack=array[:,:,3]
+
+        # Boolean values whether enemy or attack are present in observation
+        enemy_boolean = np.sum(enemy)>0
+        attack_boolean = np.sum(attack)>0
+        agent_boolean = np.sum(agent)>0
+
+        # Calculate distances
+        # distance between enemy and agent 
+        if enemy_boolean and agent_boolean:
+            y_enemy,x_enemy=np.where(enemy==1)
+            y_enemy,x_enemy=np.mean(y_enemy),np.mean(x_enemy) #average coordinate of enemy
+
+            y_agent,x_agent=np.where(agent==1)
+            y_agent,x_agent=np.mean(y_agent),np.mean(x_agent) #average coordinate of agent
+
+            # Calculate distance between agent and enemy
+            enemy_distance = self.distance(x_agent,y_agent,x_enemy,y_enemy)
+        else:
+            enemy_distance = np.nan
+
+        # distance between attack and agent
+        if attack_boolean and agent_boolean:
+            y_enemy,x_enemy=np.where(enemy==1)
+            y_enemy,x_enemy=np.mean(y_enemy),np.mean(x_enemy) #average coordinate of enemy
+
+            y_agent,x_agent=np.where(agent==1)
+            y_agent,x_agent=np.mean(y_agent),np.mean(x_agent) #average coordinate of agent
+
+            # Calculate distance between agent and enemy
+            attack_distance = self.distance(x_agent,y_agent,x_enemy,y_enemy)
+        else:
+            attack_distance = np.nan
+
+        return enemy_boolean, attack_boolean, agent_boolean, enemy_distance, attack_distance
 
 
     def distance(self,Px,Py,Qx,Qy):
@@ -181,13 +226,11 @@ class Record():
             output_name=folder+'/concat.npy'
             np.save(output_name,fmat)
 
-    def get_observation(self,observation):
-        self.observation=observation
+    def classify_observation(self,observation):
+        # Get relevant threat information from observation
+        threat_boolean,threat_distance = self.threat_detector(observation)
 
     def add_activation_hook(self, agent):
-        # Get relevant threat information from observation
-        threat_boolean,threat_distance = self.threat_detector(self.observation)
-
         # module is essentially the layer
         # Keeps track of layer name and description to add to top of csv
         layerList = []
