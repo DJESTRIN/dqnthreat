@@ -134,12 +134,14 @@ class AnalyzeObservation():
 
         # Calculate distances
         # distance between enemy and agent 
+        if agent_boolean:
+            y_agent,x_agent=np.where(agent==1)
+            y_agent,x_agent=np.mean(y_agent),np.mean(x_agent) #average coordinate of agent
+
+
         if enemy_boolean and agent_boolean:
             y_enemy,x_enemy=np.where(enemy==1)
             y_enemy,x_enemy=np.mean(y_enemy),np.mean(x_enemy) #average coordinate of enemy
-
-            y_agent,x_agent=np.where(agent==1)
-            y_agent,x_agent=np.mean(y_agent),np.mean(x_agent) #average coordinate of agent
 
             # Calculate distance between agent and enemy
             enemy_distance = self.distance(x_agent,y_agent,x_enemy,y_enemy)
@@ -148,14 +150,11 @@ class AnalyzeObservation():
 
         # distance between attack and agent
         if attack_boolean and agent_boolean:
-            y_enemy,x_enemy=np.where(enemy==1)
-            y_enemy,x_enemy=np.mean(y_enemy),np.mean(x_enemy) #average coordinate of enemy
-
-            y_agent,x_agent=np.where(agent==1)
-            y_agent,x_agent=np.mean(y_agent),np.mean(x_agent) #average coordinate of agent
+            y_attack,x_attack=np.where(attack==1)
+            y_attack,x_attack=np.mean(y_attack),np.mean(x_attack) #average coordinate of enemy
 
             # Calculate distance between agent and enemy
-            attack_distance = self.distance(x_agent,y_agent,x_enemy,y_enemy)
+            attack_distance = self.distance(x_agent,y_agent,x_attack,y_attack)
         else:
             attack_distance = np.nan
 
