@@ -15,7 +15,6 @@ from torch.utils.tensorboard import SummaryWriter
 from random import randrange
 #import Record
 
-
 def parse_args():
     # fmt: off
     parser = argparse.ArgumentParser()
@@ -144,10 +143,10 @@ if __name__ == "__main__":
     results_directory=args.dropdirectory
     if results_directory[-1:]!='/':
         results_directory+='/' # Make sure last value is a forward slash
-    run_name = f"{args.env_id}__{args.exp_name}__{args.seed}__{int(time.time())}"
+    run_name = f"{args.exp_name}__{args.seed}"
 
 
-    writer = SummaryWriter([results_directory + f"runs/{run_name}"])
+    writer = SummaryWriter([f"{results_directory}runs/{run_name}"])
     writer.add_text("hyperparameters","|param|value|\n|-|-|\n%s" % ("\n".join([f"|{key}|{value}|" for key, value in vars(args).items()])),)
 
     # Set seed for all relevant packages
@@ -188,7 +187,7 @@ if __name__ == "__main__":
     start_time = time.time()
 
     obs, _ = envs.reset(seed=args.seed)
-    #record.get_observation(obs)
+    #record.classify_observation(obs)
 
     all_rewards=[]
     for global_step in range(args.total_timesteps):
@@ -204,7 +203,7 @@ if __name__ == "__main__":
             actions = np.array([envs.single_action_space.sample() for _ in range(envs.num_envs)])
 
         next_obs, rewards, terminated, truncated, infos = envs.step(actions)
-        #record.get_observation(next_obs)
+        #record.classify_observation(next_obs)
 
         # Save real reward value at end of each episode
         if terminated:
@@ -219,9 +218,9 @@ if __name__ == "__main__":
                 if "episode" not in info:
                     continue
                 print(f"global_step={global_step}, episodic_return={info['episode']['r']}")
-                writer.add_scalar([results_directory + "charts/episodic_return"], info["episode"]["r"], global_step)
-                writer.add_scalar([results_directory + "charts/episode_length"], info["episode"]["l"], global_step)
-                writer.add_scalar([results_directory + "charts/epsilon"], epsilon, global_step)
+                writer.add_scalar(["charts/episodic_return"], info["episode"]["r"], global_step)
+                writer.add_scalar(["charts/episode_length"], info["episode"]["l"], global_step)
+                writer.add_scalar(["charts/epsilon"], epsilon, global_step)
 
         real_next_obs = next_obs.copy()
         for idx, d in enumerate(truncated):
@@ -241,10 +240,10 @@ if __name__ == "__main__":
                 loss = F.mse_loss(td_target, old_val)
 
                 if global_step % 100 == 0:
-                    writer.add_scalar([results_directory + "losses/td_loss"], loss, global_step)
-                    writer.add_scalar([results_directory + "losses/q_values"], old_val.mean().item(), global_step)
+                    writer.add_scalar(["losses/td_loss"], loss, global_step)
+                    writer.add_scalar(["losses/q_values"], old_val.mean().item(), global_step)
                     print("SPS:", int(global_step / (time.time() - start_time)))
-                    writer.add_scalar([results_directory + "charts/SPS"], int(global_step / (time.time() - start_time)), global_step)
+                    writer.add_scalar(["charts/SPS"], int(global_step / (time.time() - start_time)), global_step)
 
                 optimizer.zero_grad()
                 loss.backward()
@@ -256,11 +255,11 @@ if __name__ == "__main__":
 
     # Save list of reward values as numpy array
     all_rewards=np.asarray(all_rewards)
-    filename=results_directory + 'allrewards.npy'
+    filename=f"{results_directory}allrewards.npy"
     np.save(filename,all_rewards)
     
     if args.save_model:
-        model_path = results_directory + f"runs/{run_name}/{args.exp_name}.pth"
+        model_path = f"{results_directory}runs/{run_name}/{args.exp_name}.pth"
         torch.save(q_network.state_dict(), model_path)
         print(f"model saved to {model_path}")
 
@@ -278,7 +277,7 @@ if __name__ == "__main__":
         )
 
         for idx, episodic_return in enumerate(episodic_returns):
-            writer.add_scalar([results_directory +"eval/episodic_return"], episodic_return, idx)
+            writer.add_scalar(["eval/episodic_return"], episodic_return, idx)
 
     envs.close()
     writer.close()

@@ -1,5 +1,4 @@
 #!/bin/bash
-
 #collect inputs into bash file
 seed=$1
 output_directory=$2
