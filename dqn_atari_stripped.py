@@ -144,6 +144,8 @@ if __name__ == "__main__":
     if results_directory[-1:]!='/':
         results_directory+='/' # Make sure last value is a forward slash
     run_name = f"{args.exp_name}__{args.seed}"
+    reward_output_dir=f"{results_directory}{run_name}/"
+    os.mkdir(reward_output_dir)
 
 
     writer = SummaryWriter(f"{results_directory}runs/{run_name}")
@@ -255,7 +257,7 @@ if __name__ == "__main__":
 
     # Save list of reward values as numpy array
     all_rewards=np.asarray(all_rewards)
-    filename=f"{results_directory}allrewards.npy"
+    filename=f"{results_directory}{run_name}/allrewards.npy"
     np.save(filename,all_rewards)
     
     if args.save_model:
