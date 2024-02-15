@@ -6,10 +6,7 @@ for i in {1..10}
 do
     CURRENTEPOCTIME=`date +%s`
     RANDOMSEED=$(($CURRENTEPOCTIME + $i))
-    sbatch --job-name=stitch_files \
-        --mem=50G \
-        --partition=scu-cpu \ 
-        --mail-type=BEGIN,END,FAIL \
+    sbatch --job-name=stitch_files --mem=50G --partition=scu-cpu --mail-type=BEGIN,END,FAIL \
         --mail-user=dje4001@med.cornell.edu \
         --wrap=" source ~/.bashrc; conda activate ataridqn; python3 dqn_atari_stripped.py \
         --seed $RANDOMSEED \
@@ -28,10 +25,7 @@ for i in {1..10}
 do
     CURRENTEPOCTIME=`date +%s`
     RANDOMSEED=$(($CURRENTEPOCTIME + $i))
-    sbatch --job-name=stitch_files \
-        --mem=50G \
-        --partition=scu-cpu \ 
-        --mail-type=BEGIN,END,FAIL \
+    sbatch --job-name=stitch_files --mem=50G --partition=scu-cpu --mail-type=BEGIN,END,FAIL \
         --mail-user=dje4001@med.cornell.edu \
         --wrap=" source ~/.bashrc; conda activate ataridqn; python3 dqn_atari_stripped.py \
         --seed $RANDOMSEED \
