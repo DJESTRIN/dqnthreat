@@ -146,7 +146,7 @@ if __name__ == "__main__":
     run_name = f"{args.exp_name}__{args.seed}"
 
 
-    writer = SummaryWriter([f"{results_directory}runs/{run_name}"])
+    writer = SummaryWriter(f"{results_directory}runs/{run_name}")
     writer.add_text("hyperparameters","|param|value|\n|-|-|\n%s" % ("\n".join([f"|{key}|{value}|" for key, value in vars(args).items()])),)
 
     # Set seed for all relevant packages
@@ -218,9 +218,9 @@ if __name__ == "__main__":
                 if "episode" not in info:
                     continue
                 print(f"global_step={global_step}, episodic_return={info['episode']['r']}")
-                writer.add_scalar(["charts/episodic_return"], info["episode"]["r"], global_step)
-                writer.add_scalar(["charts/episode_length"], info["episode"]["l"], global_step)
-                writer.add_scalar(["charts/epsilon"], epsilon, global_step)
+                writer.add_scalar("charts/episodic_return", info["episode"]["r"], global_step)
+                writer.add_scalar("charts/episode_length", info["episode"]["l"], global_step)
+                writer.add_scalar("charts/epsilon", epsilon, global_step)
 
         real_next_obs = next_obs.copy()
         for idx, d in enumerate(truncated):
@@ -240,10 +240,10 @@ if __name__ == "__main__":
                 loss = F.mse_loss(td_target, old_val)
 
                 if global_step % 100 == 0:
-                    writer.add_scalar(["losses/td_loss"], loss, global_step)
-                    writer.add_scalar(["losses/q_values"], old_val.mean().item(), global_step)
+                    writer.add_scalar("losses/td_loss", loss, global_step)
+                    writer.add_scalar("losses/q_values", old_val.mean().item(), global_step)
                     print("SPS:", int(global_step / (time.time() - start_time)))
-                    writer.add_scalar(["charts/SPS"], int(global_step / (time.time() - start_time)), global_step)
+                    writer.add_scalar("charts/SPS", int(global_step / (time.time() - start_time)), global_step)
 
                 optimizer.zero_grad()
                 loss.backward()
@@ -277,7 +277,7 @@ if __name__ == "__main__":
         )
 
         for idx, episodic_return in enumerate(episodic_returns):
-            writer.add_scalar(["eval/episodic_return"], episodic_return, idx)
+            writer.add_scalar("eval/episodic_return", episodic_return, idx)
 
     envs.close()
     writer.close()
