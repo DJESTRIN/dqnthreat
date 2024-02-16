@@ -32,8 +32,12 @@ class SuperLogger():
         return logger
     
     def setThreatInfo(self, enemy_boolean, attack_boolean, agent_boolean, enemy_distance, attack_distance):
-        self.threat_boolean = threat_boolean
-        self.threat_distance = threat_distance
+        self.enemy_boolean = enemy_boolean
+        self.attack_boolean = attack_boolean
+        self.agent_boolean = agent_boolean
+        self.enemy_distance = enemy_distance
+        self.attack_distance = attack_distance
+        
 
     def checkAddToCSV(self):
         # If all loggers have an output and observation is recorded, we can place into the csv
