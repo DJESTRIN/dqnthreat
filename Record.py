@@ -21,6 +21,8 @@ class SuperLogger():
     # Holds a list of loggers, and uses the outputs to create a list to place into a csv
     def __init__(self, csvFilePath):
         self.loggers = []
+        self.threat_boolean = None
+        self.threat_distance = None
         self.csvFilePath = csvFilePath
     
     # addLogger returns the logger, allowing us to directly register the hook 
@@ -29,8 +31,12 @@ class SuperLogger():
         self.loggers.append(logger)
         return logger
     
+    def setThreatInfo(self, threat_boolean, threat_distance):
+        self.threat_boolean = threat_boolean
+        self.threat_distance = threat_distance
+
     def checkAddToCSV(self):
-        # If all loggers have an output, we can place into the csv
+        # If all loggers have an output and observation is recorded, we can place into the csv
         # After placing into csv, we can reset all outputs
         newRow = []
         for logger in self.loggers:
@@ -38,10 +44,22 @@ class SuperLogger():
                 return
             else:
                 newRow.append(logger.output)
+
+        
+        if self.threat_boolean == None:
+            return
+        if self.threat_distance == None:
+            return
+        
+        newRow.append(self.threat_boolean)
+        newRow.append(self.threat_distance)
+
         with open(self.csvFilePath, 'a') as file:
             writer = csv.writer(file)
             writer.writerow(newRow)
             self.setAllLoggers(None)
+            self.threat_boolean = None
+            self.threat_distance = None
 
     def setAllLoggers(self, value):
         for logger in self.loggers:
@@ -227,6 +245,10 @@ class Record():
         # Get relevant threat information from observation
         threat_boolean,threat_distance = self.threat_detector(observation)
 
+        # We need to account for the case that superLogger has not been initialized yet
+        if self.superLogger != None:
+            self.superLogger.setThreatInfo(threat_boolean, threat_distance)
+
     def add_activation_hook(self, agent):
         # module is essentially the layer
         # Keeps track of layer name and description to add to top of csv
@@ -239,6 +261,9 @@ class Record():
             name = name if name != "" else "no_name_network"
             module.register_forward_hook(self.superLogger.addLogger())
             layerList.append(name)
+        
+        layerList.append('threat_boolean')
+        layerList.append('threat_distance')
         
         # Adding first row with layer names
         # I chose w to reset the file
