@@ -21,8 +21,11 @@ class SuperLogger():
     # Holds a list of loggers, and uses the outputs to create a list to place into a csv
     def __init__(self, csvFilePath):
         self.loggers = []
-        self.threat_boolean = None
-        self.threat_distance = None
+        self.enemy_boolean = None
+        self.attack_boolean = None
+        self.agent_boolean = None
+        self.enemy_distance = None
+        self.attack_distance = None
         self.csvFilePath = csvFilePath
     
     # addLogger returns the logger, allowing us to directly register the hook 
@@ -50,20 +53,32 @@ class SuperLogger():
                 newRow.append(logger.output)
 
         
-        if self.threat_boolean == None:
+        if self.enemy_boolean == None:
             return
-        if self.threat_distance == None:
+        if self.attack_boolean == None:
             return
-        
-        newRow.append(self.threat_boolean)
-        newRow.append(self.threat_distance)
+        if self.agent_boolean == None:
+            return
+        if self.enemy_distance == None:
+            return
+        if self.attack_distance == None:
+            return
+       
+        newRow.append(self.enemy_boolean)
+        newRow.append(self.attack_boolean)
+        newRow.append(self.agent_boolean)
+        newRow.append(self.enemy_distance)
+        newRow.append(self.attack_distance)
 
         with open(self.csvFilePath, 'a') as file:
             writer = csv.writer(file)
             writer.writerow(newRow)
             self.setAllLoggers(None)
-            self.threat_boolean = None
-            self.threat_distance = None
+            self.enemy_boolean = None
+            self.attack_boolean = None
+            self.agent_boolean = None
+            self.enemy_distance = None
+            self.attack_distance = None
 
     def setAllLoggers(self, value):
         for logger in self.loggers:
@@ -206,8 +221,7 @@ class Record():
 
         self.superLogger = None
 
-        # created threat detector object. 
-        # Call threat_detector(observation) which returns threat_detected (boolean) and threat_distance (float or np.nan) 
+        # created threat detector object.  
         self.threat_detector=AnalyzeObservation(ilastik_dir,ilp_file,output_dir)
         
     def grab_w_n_b(self,agent,episode):
@@ -266,9 +280,12 @@ class Record():
             module.register_forward_hook(self.superLogger.addLogger())
             layerList.append(name)
         
-        layerList.append('threat_boolean')
-        layerList.append('threat_distance')
-        
+        layerList.append('enemy_boolean')
+        layerList.append('attack_boolean')
+        layerList.append('agent_boolean')
+        layerList.append('enemy_distance')
+        layerList.append('attack_distance')
+
         # Adding first row with layer names
         # I chose w to reset the file
         with open(outputPath, 'w', newline='') as file:
