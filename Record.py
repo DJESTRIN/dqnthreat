@@ -31,7 +31,7 @@ class SuperLogger():
         self.loggers.append(logger)
         return logger
     
-    def setThreatInfo(self, threat_boolean, threat_distance):
+    def setThreatInfo(self, enemy_boolean, attack_boolean, agent_boolean, enemy_distance, attack_distance):
         self.threat_boolean = threat_boolean
         self.threat_distance = threat_distance
 
@@ -243,11 +243,11 @@ class Record():
 
     def classify_observation(self,observation):
         # Get relevant threat information from observation
-        threat_boolean,threat_distance = self.threat_detector(observation)
+        enemy_boolean, attack_boolean, agent_boolean, enemy_distance, attack_distance = self.threat_detector(observation)
 
         # We need to account for the case that superLogger has not been initialized yet
         if self.superLogger != None:
-            self.superLogger.setThreatInfo(threat_boolean, threat_distance)
+            self.superLogger.setThreatInfo(enemy_boolean, attack_boolean, agent_boolean, enemy_distance, attack_distance)
 
     def add_activation_hook(self, agent):
         # module is essentially the layer
