@@ -191,9 +191,10 @@ if __name__ == "__main__":
 
     obs, _ = envs.reset(seed=args.seed)
     #record.classify_observation(obs)
-    set_diff = ChangeDifficulty(1)
+    set_diff = ChangeDifficulty(0)
     set_diff.modify_observation(obs)
     all_rewards=[]
+    episode_counter=0
     for global_step in range(args.total_timesteps):
         epsilon = linear_schedule(args.start_e, args.end_e, args.exploration_fraction * args.total_timesteps, global_step)
         if random.random() < epsilon:
@@ -207,10 +208,16 @@ if __name__ == "__main__":
             actions = np.array([envs.single_action_space.sample() for _ in range(envs.num_envs)])
 
         next_obs, rewards, terminated, truncated, infos = envs.step(actions)
+        set_diff.modify_observation(next_obs)
+
+        if episode_counter>600: # FOR TESTING PLEASE DELETE
+            set_diff.update_difficulty(1)
+
         #record.classify_observation(next_obs)
 
         # Save real reward value at end of each episode
         if terminated:
+            episode_counter+=1  
             all_rewards.append(rewards)
             
         # Set random reward for junk agents    
