@@ -191,8 +191,8 @@ if __name__ == "__main__":
 
     obs, _ = envs.reset(seed=args.seed)
     #record.classify_observation(obs)
-    ChangeDifficulty(1)
-    ChangeDifficulty.modify_observation(obs)
+    set_diff = ChangeDifficulty(1)
+    set_diff.modify_observation(obs)
     all_rewards=[]
     for global_step in range(args.total_timesteps):
         epsilon = linear_schedule(args.start_e, args.end_e, args.exploration_fraction * args.total_timesteps, global_step)
