@@ -21,7 +21,7 @@ def parse_args():
     parser = argparse.ArgumentParser()
     parser.add_argument("--exp-name", type=str, default=os.path.basename(__file__).rstrip(".py"),
         help="the name of this experiment")
-    parser.add_argument("--difficulty", type=int, default=0,
+    parser.add_argument("--difficulty", type=float, default=0,
         help="difficulty of the experiment")
     parser.add_argument("--seed", type=int, default=1,
         help="seed of the experiment")
@@ -78,7 +78,7 @@ def parse_args():
     return args
 
 
-def make_env(env_id, seed, idx, capture_video, run_name, difficulty):
+def make_env(env_id, seed, idx, capture_video, run_name):
     def thunk():
         if capture_video and idx == 0:
             env = gym.make(env_id, render_mode="rgb_array")
@@ -100,7 +100,6 @@ def make_env(env_id, seed, idx, capture_video, run_name, difficulty):
         env = gym.wrappers.FrameStack(env, 4)
         env.action_space.seed(seed)
 
-        env.env.game_difficulty=difficulty
         env.seed()
         env.reset()
 
@@ -163,7 +162,7 @@ if __name__ == "__main__":
     print(device)
 
     envs = gym.vector.SyncVectorEnv(
-        [make_env(args.env_id, args.seed + i, i, args.capture_video, run_name,args.difficulty) for i in range(args.num_envs)]
+        [make_env(args.env_id, args.seed + i, i, args.capture_video, run_name) for i in range(args.num_envs)]
     )
     assert isinstance(envs.single_action_space, gym.spaces.Discrete), "only discrete action space is supported"
 
@@ -191,8 +190,9 @@ if __name__ == "__main__":
 
     obs, _ = envs.reset(seed=args.seed)
     #record.classify_observation(obs)
-    set_diff = ChangeDifficulty(0)
+    set_diff = ChangeDifficulty(args.difficulty)
     set_diff.modify_observation(obs)
+
     all_rewards=[]
     episode_counter=0
     for global_step in range(args.total_timesteps):
@@ -209,9 +209,6 @@ if __name__ == "__main__":
 
         next_obs, rewards, terminated, truncated, infos = envs.step(actions)
         set_diff.modify_observation(next_obs)
-
-        if episode_counter>600: # FOR TESTING PLEASE DELETE
-            set_diff.update_difficulty(1)
 
         #record.classify_observation(next_obs)
 
