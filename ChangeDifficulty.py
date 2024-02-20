@@ -17,4 +17,5 @@ class ChangeDifficulty():
         observation=observation+(self.difficulty*noise) #Update observation using difficulty scalar
         observation[observation>255]=255
         observation[observation<0]=0
+        print(observation)
         return observation
