@@ -192,7 +192,7 @@ if __name__ == "__main__":
     obs, _ = envs.reset(seed=args.seed)
     #record.classify_observation(obs)
     set_diff = ChangeDifficulty(args.difficulty)
-    obs = set_diff.modify_observation(obs)
+    obs = set_diff.modify_observation(obs,False)
 
     all_rewards=[]
     episode_counter=0
