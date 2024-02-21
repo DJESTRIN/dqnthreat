@@ -3,7 +3,6 @@ import numpy as np
 import glob
 import matplotlib.pyplot as plt 
 from matplotlib.image import imread as ir
-import ipdb
 
 class ChangeDifficulty():
     def __init__(self,difficulty):
@@ -15,26 +14,15 @@ class ChangeDifficulty():
         self.difficulty=float(difficulty)
 
     def modify_observation(self,observation,save_image):
-        ipdb.set_trace()
         try:
             d1,d2,d3,d4=observation.shape #Get observation dimensions
-            noise=np.random.rand(d1,d2,d3,d4) #Get an array of noise values [0,1) same shape as observation
+            noise=np.random.uniform(-1,1,(d1,d2,d3,d4)) #Get an array of noise values [0,1) same shape as observation
         except:
             d1,d2=observation.shape #Get observation dimensions
-            noise=np.random.rand(d1,d2) #Get an array of noise values [0,1) same shape as observation
+            noise=np.random.uniform(-1,1,(d1,d2)) #Get an array of noise values [0,1) same shape as observation
         observation=observation+(self.difficulty*noise) #Update observation using difficulty scalar
         observation[observation>255]=255
         observation[observation<0]=0
-
-        if save_image:
-            plt.figure()
-            ipdb.set_trace()
-            nobs=np.squeeze(observation)
-            nobs=nobs[0,:,:]
-            plt.imshow(nobs,cmap='gray')
-            filename='/home/fs01/dje4001/dqnthreat/'+str(self.difficulty)+'exampleimage2.jpg'
-            plt.savefig(filename)
-
         return observation
     
 
