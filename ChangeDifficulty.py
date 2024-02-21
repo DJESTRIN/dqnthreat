@@ -3,6 +3,7 @@ import numpy as np
 import glob
 import matplotlib.pyplot as plt 
 from matplotlib.image import imread as ir
+import ipdb
 
 class ChangeDifficulty():
     def __init__(self,difficulty):
@@ -26,6 +27,7 @@ class ChangeDifficulty():
 
         if save_image:
             plt.figure()
+            ipdb.set_trace()
             pltobs=np.squeeze(observation)
             pltobs=plotbs[0,:,:]
             plt.imshow(pltobs,cmap='gray')
