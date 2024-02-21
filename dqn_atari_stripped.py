@@ -191,7 +191,7 @@ if __name__ == "__main__":
     obs, _ = envs.reset(seed=args.seed)
     #record.classify_observation(obs)
     set_diff = ChangeDifficulty(args.difficulty)
-    set_diff.modify_observation(obs)
+    obs = set_diff.modify_observation(obs)
 
     all_rewards=[]
     episode_counter=0
@@ -208,7 +208,7 @@ if __name__ == "__main__":
             actions = np.array([envs.single_action_space.sample() for _ in range(envs.num_envs)])
 
         next_obs, rewards, terminated, truncated, infos = envs.step(actions)
-        set_diff.modify_observation(next_obs)
+        next_obs = set_diff.modify_observation(next_obs)
 
         #record.classify_observation(next_obs)
 
