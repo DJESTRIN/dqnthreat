@@ -4,7 +4,7 @@ import glob
 import matplotlib.pyplot as plt
 import tqdm
 
-search_string = '/athena/listonlab/scratch/anp4047/difftest6/runs/**/events*'
+search_string = '/athena/listonlab/scratch/anp4047/difftest7/runs/**/events*'
 tbfiles = glob.glob(search_string)
 
 plt.figure()
