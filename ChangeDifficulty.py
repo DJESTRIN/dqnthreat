@@ -4,15 +4,14 @@ import glob
 import matplotlib.pyplot as plt 
 from matplotlib.image import imread as ir
 
-
 class ChangeDifficulty():
     def __init__(self,difficulty):
         #Initial difficulty scalar, 0 means no change. S
-        self.difficulty=difficulty
+        self.difficulty=float(difficulty)
         
     def update_difficulty(self,difficulty):
         # update difficulty if you would like during the game
-        self.difficulty=difficulty
+        self.difficulty=float(difficulty)
 
     def modify_observation(self,observation):
         try:
@@ -50,7 +49,7 @@ def plot_example_difficulties(image_path):
             axs[row,col].imshow(set_diff.modify_observation(im),cmap="gray")
             axs[row, col].set_title(f'Difficulty = {j/10}')
             axs[row, col].axis("off")
-        savestring=image_path+'noisyfig.JPG'
+        savestring=image_path+'noisyfig.JPG' # only saving one image for now
         f.savefig(savestring)
 
 if __name__=='__main__':
