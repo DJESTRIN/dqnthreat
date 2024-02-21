@@ -18,4 +18,4 @@ for file in tqdm.tqdm(tbfiles):
     elif "hard" in file:
         plt.plot(df["step"],df["value"],'r')
 
-plt.savefig('/home/fs01/dje4001/dqnthreat/diffcomp.jpg')
+plt.savefig('/home/fs01/dje4001/dqnthreat/diffcomp2.jpg')
