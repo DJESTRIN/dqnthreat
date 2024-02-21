@@ -29,7 +29,7 @@ class ChangeDifficulty():
             nobs=np.squeeze(observation)
             nobs=nobs[0,:,:]
             plt.imshow(nobs,cmap='gray')
-            filename=str(self.difficulty)+'exampleimage.jpg'
+            filename='/home/fs01/dje4001/dqnthreat'+str(self.difficulty)+'exampleimage2.jpg'
             plt.savefig(filename)
 
         return observation
