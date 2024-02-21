@@ -26,7 +26,9 @@ class ChangeDifficulty():
 
         if save_image:
             plt.figure()
-            plt.imshow(observation,cmap='gray')
+            pltobs=np.squeeze(observation)
+            pltobs=plotbs[0,:,:]
+            plt.imshow(pltobs,cmap='gray')
             filename=str(self.difficulty)+'exampleimage.jpg'
             plt.savefig(filename)
 
