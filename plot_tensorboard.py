@@ -21,4 +21,4 @@ for file in tqdm.tqdm(tbfiles):
     except:
         print(f'{file} was skipped')
 
-plt.savefig('/home/fs01/dje4001/dqnthreat/diffcomp2.jpg')
+plt.savefig('/home/fs01/dje4001/dqnthreat/diffcomp3.jpg')
