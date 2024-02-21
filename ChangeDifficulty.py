@@ -13,7 +13,7 @@ class ChangeDifficulty():
         # update difficulty if you would like during the game
         self.difficulty=float(difficulty)
 
-    def modify_observation(self,observation,save_image):
+    def modify_observation(self,observation):
         try:
             d1,d2,d3,d4=observation.shape #Get observation dimensions
             noise=np.random.uniform(-1,1,(d1,d2,d3,d4)) #Get an array of noise values [0,1) same shape as observation

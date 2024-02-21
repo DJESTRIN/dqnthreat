@@ -192,7 +192,7 @@ if __name__ == "__main__":
     obs, _ = envs.reset(seed=args.seed)
     #record.classify_observation(obs)
     set_diff = ChangeDifficulty(args.difficulty)
-    obs = set_diff.modify_observation(obs,False)
+    obs = set_diff.modify_observation(obs)
 
     all_rewards=[]
     episode_counter=0
@@ -210,7 +210,7 @@ if __name__ == "__main__":
 
         next_obs, rewards, terminated, truncated, infos = envs.step(actions)
         ipdb.set_trace()
-        next_obs = set_diff.modify_observation(next_obs,True)
+        next_obs = set_diff.modify_observation(next_obs)
 
         #record.classify_observation(next_obs)
 
