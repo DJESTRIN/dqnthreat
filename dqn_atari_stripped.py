@@ -15,7 +15,6 @@ from torch.utils.tensorboard import SummaryWriter
 from random import randrange
 #import Record
 from ChangeDifficulty import ChangeDifficulty
-import ipdb
 
 def parse_args():
     # fmt: off
@@ -209,7 +208,6 @@ if __name__ == "__main__":
             actions = np.array([envs.single_action_space.sample() for _ in range(envs.num_envs)])
 
         next_obs, rewards, terminated, truncated, infos = envs.step(actions)
-        ipdb.set_trace()
         next_obs = set_diff.modify_observation(next_obs)
 
         #record.classify_observation(next_obs)
