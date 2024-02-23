@@ -14,7 +14,7 @@ from stable_baselines3.common.buffers import ReplayBuffer
 from torch.utils.tensorboard import SummaryWriter
 from random import randrange
 #import Record
-from ChangeDifficulty import ChangeDifficulty
+from ChangeDifficulty import AddNoiseToObservation
 
 def parse_args():
     # fmt: off
@@ -190,7 +190,7 @@ if __name__ == "__main__":
 
     obs, _ = envs.reset(seed=args.seed)
     #record.classify_observation(obs)
-    set_diff = ChangeDifficulty(args.difficulty)
+    set_diff = AddNoiseToObservation(args.difficulty)
     obs = set_diff.modify_observation(obs)
     terminated=False
 
