@@ -15,7 +15,7 @@ class AddNoiseToGym(ObservationWrapper):
         self.observation_space = Box(low=0, high=255, shape=obs_shape, dtype=np.uint8)
 
     # def observation(self, obsreal):
-    def observation(self, obs):
+    # def observation(self, obs):
         # try:
         #     obs,other=obsreal
         #     d1,d2,d3=obs.shape #Get observation dimensions
@@ -26,7 +26,7 @@ class AddNoiseToGym(ObservationWrapper):
         # obs=obs+(15*noise)
         # obs[obs>255]=255
         # obs[obs<0]=0
-        return obs
+        # return obs
 
 
 class ChangeDifficulty():
