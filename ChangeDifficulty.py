@@ -11,17 +11,18 @@ class AddNoiseToGym(ObservationWrapper):
     def __init__(self, env):
         super().__init__(env)
 
-    def observation(self, obs):
+    def observation(self, obsreal):
         try:
-            ipdb.set_trace()
-            d1,d2,d3,d4=obs.shape #Get observation dimensions
-            noise=np.random.uniform(-1,1,(d1,d2,d3,d4)) #Get an array of noise values [0,1) same shape as observation
+            obs,other=obsreal
+            d1,d2,d3=obs.shape #Get observation dimensions
+            noise=np.random.uniform(-1,1,(d1,d2,d3)) #Get an array of noise values [0,1) same shape as observation
         except:
             d1,d2=obs.shape #Get observation dimensions
             noise=np.random.uniform(-1,1,(d1,d2)) #Get an array of noise values [0,1) same shape as observation
         obs=obs+(15*noise)
         obs[obs>255]=255
         obs[obs<0]=0
+        obsreal=(obs,other)
         return obs
 
 
