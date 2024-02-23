@@ -22,7 +22,7 @@ class AddNoiseToGym(ObservationWrapper):
         obs=obs+(15*noise)
         obs[obs>255]=255
         obs[obs<0]=0
-        obsreal=tuple(obs,other)
+        obsreal=tuple((obs,other))
         return obsreal
 
 
