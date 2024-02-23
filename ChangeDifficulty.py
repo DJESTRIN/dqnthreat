@@ -25,7 +25,7 @@ class AddNoiseToGym(ObservationWrapper):
         obs=obs+(15*noise)
         obs[obs>255]=255
         obs[obs<0]=0
-        return (obs,other)
+        return obs
 
 
 class ChangeDifficulty():
