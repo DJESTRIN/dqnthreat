@@ -53,6 +53,8 @@ class ChangeDifficulty():
         return observation
     
     def capture_video(self,observation,terminated,drop_folder):
+        ipdb.set_trace()
+
         if not os.path.exists(drop_folder):
             os.makedirs(drop_folder)
 
@@ -69,6 +71,7 @@ class ChangeDifficulty():
             self.filename=f'{drop_folder}episode{self.episode}.mp4'
             fps=10
             self.video=cv2.VideoWriter(self.filename, cv2.VideoWriter_fourcc(*'mp4v'), fps, (size[1], size[0]), False)
+        ipdb.set_trace()
         obs = np.squeeze(observation)
         obs = obs[0,:,:]
         self.video.write(obs)
