@@ -19,10 +19,10 @@ from gymnasium.utils.play import play
 
 def make_env(env_id, seed, idx, capture_video, run_name):
     if capture_video and idx == 0:
-        env = gym.make(env_id, render_mode="human", difficulty=1)
+        env = gym.make(env_id, render_mode="rgb_array", difficulty=1)
         env = gym.wrappers.RecordVideo(env, f"videos/{run_name}")
     else:
-        env = gym.make(env_id, render_mode="human", difficulty=1)
+        env = gym.make(env_id, render_mode="rgb_array", difficulty=1)
     env = gym.wrappers.RecordEpisodeStatistics(env)
     env = NoopResetEnv(env, noop_max=30)
     env = MaxAndSkipEnv(env, skip=4)
