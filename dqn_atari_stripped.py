@@ -192,9 +192,8 @@ if __name__ == "__main__":
     #record.classify_observation(obs)
     set_diff = ChangeDifficulty(args.difficulty)
     obs = set_diff.modify_observation(obs)
+    terminated=False
 
-    all_rewards=[]
-    episode_counter=0
     for global_step in range(args.total_timesteps):
         epsilon = linear_schedule(args.start_e, args.end_e, args.exploration_fraction * args.total_timesteps, global_step)
 
@@ -212,11 +211,6 @@ if __name__ == "__main__":
         next_obs, rewards, terminated, truncated, infos = envs.step(actions)
         next_obs = set_diff.modify_observation(next_obs)
         #record.classify_observation(next_obs)
-
-        # Save real reward value at end of each episode
-        if terminated:
-            episode_counter+=1  
-            all_rewards.append(rewards)
             
         # Set random reward for junk agents    
         if args.agenttype=='junk':
@@ -262,10 +256,6 @@ if __name__ == "__main__":
                 for target_network_param, q_network_param in zip(target_network.parameters(), q_network.parameters()):
                     target_network_param.data.copy_(args.tau * q_network_param.data + (1.0 - args.tau) * target_network_param.data)
 
-    # Save list of reward values as numpy array
-    all_rewards=np.asarray(all_rewards)
-    filename=f"{results_directory}{run_name}/allrewards.npy"
-    np.save(filename,all_rewards)
     
     if args.save_model:
         model_path = f"{results_directory}runs/{run_name}/{args.exp_name}.pth"
