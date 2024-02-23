@@ -19,10 +19,10 @@ from gymnasium.utils.play import PlayableGame
 
 def make_env(env_id, seed, idx, capture_video, run_name):
     if capture_video and idx == 0:
-        env = gym.make(env_id, render_mode="rgb_array", difficulty=0)
+        env = gym.make(env_id, render_mode="human", difficulty=0)
         env = gym.wrappers.RecordVideo(env, f"videos/{run_name}")
     else:
-        env = gym.make(env_id, render_mode="rgb_array", difficulty=0)
+        env = gym.make(env_id, render_mode="human", difficulty=0)
    
     #env = PlayableGame(env)
     env.action_space.seed(seed)
