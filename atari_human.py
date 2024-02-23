@@ -26,7 +26,6 @@ def make_env(env_id, seed, idx, capture_video, run_name):
     env = gym.wrappers.RecordEpisodeStatistics(env)
     env = NoopResetEnv(env, noop_max=30)
     env = MaxAndSkipEnv(env, skip=4)
-    env = PlayableGame(env)
     env = EpisodicLifeEnv(env)
 
     if "FIRE" in env.unwrapped.get_action_meanings():
@@ -36,6 +35,7 @@ def make_env(env_id, seed, idx, capture_video, run_name):
     env = gym.wrappers.ResizeObservation(env, (84, 84))
     env = gym.wrappers.GrayScaleObservation(env)
     env = gym.wrappers.FrameStack(env, 4)
+    env = PlayableGame(env)
     env.action_space.seed(seed)
 
     env.seed()
