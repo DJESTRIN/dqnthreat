@@ -20,7 +20,7 @@
 import gymnasium as gym
 from gymnasium.utils.play import play
 if __name__=='__main__':
-    play(gym.make("CarRacing-v2", render_mode="rgb_array"), keys_to_action={  
+    play(gym.make("ALE/SpaceInvaders-v5", render_mode="rgb_array"), keys_to_action={  
                                                 "w": np.array([0, 0.7, 0]),
                                                 "a": np.array([-1, 0, 0]),
                                                 "s": np.array([0, 0, 1]),
