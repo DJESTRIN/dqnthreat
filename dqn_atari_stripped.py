@@ -197,7 +197,7 @@ if __name__ == "__main__":
     for global_step in range(args.total_timesteps):
         epsilon = linear_schedule(args.start_e, args.end_e, args.exploration_fraction * args.total_timesteps, global_step)
 
-        set_diff.capture_video(obs,terminated,'/home/fs01/dje4001/dqnthreat/noise_video_extrahard/') #Generate recording of obs before agent sees   
+        set_diff.capture_video(obs,terminated,'/home/fs01/dje4001/dqnthreat/noise_video_nonoise/') #Generate recording of obs before agent sees   
         if random.random() < epsilon:
             actions = np.array([envs.single_action_space.sample() for _ in range(envs.num_envs)])
         else:
