@@ -3,6 +3,25 @@ import numpy as np
 import glob
 import matplotlib.pyplot as plt 
 from matplotlib.image import imread as ir
+from gym import ObservationWrapper
+import gymnasium as gym
+
+class AddNoiseToGym(ObservationWrapper):
+    def __init__(self, env):
+        super().__init__(env)
+
+    def observation(self, obs):
+        try:
+            d1,d2,d3,d4=obs.shape #Get observation dimensions
+            noise=np.random.uniform(-1,1,(d1,d2,d3,d4)) #Get an array of noise values [0,1) same shape as observation
+        except:
+            d1,d2=obs.shape #Get observation dimensions
+            noise=np.random.uniform(-1,1,(d1,d2)) #Get an array of noise values [0,1) same shape as observation
+        obs=obs+(15*noise)
+        obs[obs>255]=255
+        obs[obs<0]=0
+        return obs
+
 
 class ChangeDifficulty():
     def __init__(self,difficulty):

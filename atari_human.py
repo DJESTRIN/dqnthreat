@@ -20,6 +20,7 @@
 import gymnasium as gym
 from gymnasium.utils.play import play
 import numpy as np
+from ChangeDifficulty import AddNoiseToGym
 import argparse
 
 parser = argparse.ArgumentParser()
@@ -28,7 +29,11 @@ parser.add_argument("--mode", type=int,required=True)
 
 if __name__=='__main__':
     args = parser.parse_args()
-    play(gym.make("ALE/DemonAttack-v5", render_mode="rgb_array",difficulty=args.diff,mode=args.mode), keys_to_action=None,zoom=3)
+    env = gym.make("ALE/DemonAttack-v5", render_mode="rgb_array",difficulty=args.diff,mode=args.mode)
+    env = AddNoiseToGym(env)
+    play(env,zoom=3)
+
+
 
 # def make_env(env_id, seed, idx, capture_video, run_name):
 #     if capture_video and idx == 0:
