@@ -11,8 +11,8 @@ import ipdb
 class AddNoiseToGym(ObservationWrapper):
     def __init__(self, env):
         super().__init__(env)
-        obs_shape = self.observation_space.shape[:2]
-        self.observation_space = Box(low=0, high=255, shape=obs_shape, dtype=np.uint8)
+        # obs_shape = self.observation_space.shape[:2]
+        # self.observation_space = Box(low=0, high=255, shape=obs_shape, dtype=np.uint8)
 
     # def observation(self, obsreal):
     def observation(self, obs):
@@ -26,8 +26,7 @@ class AddNoiseToGym(ObservationWrapper):
         # obs=obs+(15*noise)
         # obs[obs>255]=255
         # obs[obs<0]=0
-        # return obs
-        ObservationWrapper.observation(obs)
+        return obs
 
 
 class ChangeDifficulty():
