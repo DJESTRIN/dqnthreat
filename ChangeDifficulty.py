@@ -11,6 +11,8 @@ import ipdb
 class AddNoiseToGym(ObservationWrapper):
     def __init__(self, env):
         super().__init__(env)
+        gym.utils.RecordConstructorArgs.__init__(self)
+        gym.ObservationWrapper.__init__(self, env)
         obs_shape = self.observation_space.shape[:2]
         self.observation_space = Box(low=0, high=255, shape=obs_shape, dtype=np.uint8)
 
