@@ -53,8 +53,6 @@ class ChangeDifficulty():
         return observation
     
     def capture_video(self,observation,terminated,drop_folder):
-        ipdb.set_trace()
-
         if not os.path.exists(drop_folder):
             os.makedirs(drop_folder)
 
@@ -62,20 +60,23 @@ class ChangeDifficulty():
             self.episode+=1
             self.filename=f'{drop_folder}episode{self.episode}.mp4'
             fps=10
-            ipdb.set_trace()
-            self.video=cv2.VideoWriter(self.filename, cv2.VideoWriter_fourcc(*'mp4v'), fps, (size[1], size[0]), False)
+            self.video=cv2.VideoWriter(self.filename, cv2.VideoWriter_fourcc(*'mp4v'), fps, (observation.shape[2], observation.shape[3]), 0)
 
         if terminated:
             #Generate new video per episode
+            self.video.release() # Release the previous video
             self.episode+=1
             self.filename=f'{drop_folder}episode{self.episode}.mp4'
             fps=10
-            self.video=cv2.VideoWriter(self.filename, cv2.VideoWriter_fourcc(*'mp4v'), fps, (size[1], size[0]), False)
-        ipdb.set_trace()
+            self.video=cv2.VideoWriter(self.filename, cv2.VideoWriter_fourcc(*'mp4v'), fps, (observation.shape[2], observation.shape[3]), 0)
+ 
+        # Modify observation
         obs = np.squeeze(observation)
         obs = obs[0,:,:]
+        obs = obs.astype(np.uint8) #Cannot pass float into cv2 write, must be defined pixels
+
+        # Write observation into video
         self.video.write(obs)
-        self.video.release()
 
 def plot_example_difficulties(image_path):
     search_string=image_path+'*.png'
