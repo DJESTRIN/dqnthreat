@@ -27,7 +27,7 @@ parser.add_argument("--diff", type=int,required=True)
 
 if __name__=='__main__':
     args = parser.parse_args()
-    play(gym.make("ALE/SpaceInvaders-v5", render_mode="rgb_array",difficulty=args.diff), keys_to_action=None,zoom=3)
+    play(gym.make("ALE/DemonAttack-v5", render_mode="rgb_array",difficulty=args.diff), keys_to_action=None,zoom=3)
 
 # def make_env(env_id, seed, idx, capture_video, run_name):
 #     if capture_video and idx == 0:
