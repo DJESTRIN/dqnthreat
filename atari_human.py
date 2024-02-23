@@ -26,6 +26,7 @@ def make_env(env_id, seed, idx, capture_video, run_name):
     env = gym.wrappers.RecordEpisodeStatistics(env)
     env = NoopResetEnv(env, noop_max=30)
     env = MaxAndSkipEnv(env, skip=4)
+    env = PlayableGame(env)
     env = EpisodicLifeEnv(env)
 
     if "FIRE" in env.unwrapped.get_action_meanings():
@@ -46,4 +47,4 @@ def make_env(env_id, seed, idx, capture_video, run_name):
 
 if __name__=='__main__':
     env = make_env('ALE/SpaceInvaders-v5', 57, 1, False, 'test')
-    PlayableGame(env, zoom=3)
+
