@@ -32,8 +32,8 @@ if __name__=='__main__':
     env = gym.make("ALE/DemonAttack-v5", render_mode="human",difficulty=args.diff,mode=args.mode)
     env = AddNoiseToGym(env)
     while True:
-        action = env.single_action_space.sample() 
-        env.step(action)
+        #action = env.single_action_space.sample() 
+        #env.step(action)
         env.render()
     #play(env,keys_to_action=None,zoom=3)
 
