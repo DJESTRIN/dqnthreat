@@ -29,5 +29,5 @@ def make_env(env_id, seed, idx, capture_video, run_name):
     
     return thunk
 
-
-make_env('ALE/SpaceInvaders-v5', 57, 1, False, 'test')
+if __name__=='__main__':
+    make_env('ALE/SpaceInvaders-v5', 57, 1, False, 'test')
