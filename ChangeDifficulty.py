@@ -55,7 +55,14 @@ class ChangeDifficulty():
     def capture_video(self,observation,terminated,drop_folder):
         if not os.path.exists(drop_folder):
             os.makedirs(drop_folder)
-        ipdb.set_trace()
+
+        if self.episode==0:
+            self.episode+=1
+            self.filename=f'{drop_folder}episode{self.episode}.mp4'
+            fps=10
+            ipdb.set_trace()
+            self.video=cv2.VideoWriter(self.filename, cv2.VideoWriter_fourcc(*'mp4v'), fps, (size[1], size[0]), False)
+
         if terminated:
             #Generate new video per episode
             self.episode+=1
