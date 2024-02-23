@@ -200,6 +200,7 @@ if __name__ == "__main__":
         if random.random() < epsilon:
             actions = np.array([envs.single_action_space.sample() for _ in range(envs.num_envs)])
         else:
+            set_diff.capture_video(obs,terminated,'/home/fs01/dje4001/dqnthreat/noise_video/') #Generate recording of obs before agent sees
             q_values = q_network(torch.Tensor(obs).to(device))
             actions = torch.argmax(q_values, dim=1).cpu().numpy()
             
@@ -209,7 +210,6 @@ if __name__ == "__main__":
 
         next_obs, rewards, terminated, truncated, infos = envs.step(actions)
         next_obs = set_diff.modify_observation(next_obs)
-
         #record.classify_observation(next_obs)
 
         # Save real reward value at end of each episode

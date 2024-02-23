@@ -1,12 +1,13 @@
 import random
 import numpy as np
-import glob
+import glob, os
 import matplotlib.pyplot as plt 
 from matplotlib.image import imread as ir
 from gym import ObservationWrapper
 import gymnasium as gym
 from gymnasium.spaces import Box
 import ipdb
+import cv2
 
 class AddNoiseToGym(ObservationWrapper):
     def __init__(self, env):
@@ -33,6 +34,7 @@ class ChangeDifficulty():
     def __init__(self,difficulty):
         #Initial difficulty scalar, 0 means no change. S
         self.difficulty=float(difficulty)
+        self.episode=0
         
     def update_difficulty(self,difficulty):
         # update difficulty if you would like during the game
@@ -50,6 +52,20 @@ class ChangeDifficulty():
         observation[observation<0]=0
         return observation
     
+    def capture_video(self,observation,terminated,drop_folder):
+        if not os.path.exists(drop_folder):
+            os.makedirs(drop_folder)
+        ipdb.set_trace()
+        if terminated:
+            #Generate new video per episode
+            self.episode+=1
+            self.filename=f'{drop_folder}episode{self.episode}.mp4'
+            fps=10
+            self.video=cv2.VideoWriter(self.filename, cv2.VideoWriter_fourcc(*'mp4v'), fps, (size[1], size[0]), False)
+        obs = np.squeeze(observation)
+        obs = obs[0,:,:]
+        self.video.write(obs)
+        self.video.release()
 
 def plot_example_difficulties(image_path):
     search_string=image_path+'*.png'
