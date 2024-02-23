@@ -22,7 +22,7 @@ from gymnasium.utils.play import play
 import numpy as np
 from ChangeDifficulty import AddNoiseToGym
 import argparse
-import gymnasium.wrappers import TransformObservation
+from gymnasium.wrappers import TransformObservation
 
 parser = argparse.ArgumentParser()
 parser.add_argument("--diff", type=int,required=True)
