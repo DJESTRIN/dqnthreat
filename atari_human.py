@@ -29,14 +29,9 @@ parser.add_argument("--mode", type=int,required=True)
 
 if __name__=='__main__':
     args = parser.parse_args()
-    env = gym.make("ALE/DemonAttack-v5", render_mode="human",difficulty=args.diff,mode=args.mode)
-    env = AddNoiseToGym(env)
-    while True:
-        #action = env.single_action_space.sample() 
-        #env.step(action)
-        env.reset()
-        env.render()
-    #play(env,keys_to_action=None,zoom=3)
+    env = gym.make("ALE/DemonAttack-v5", render_mode="rgb_array",difficulty=args.diff,mode=args.mode)
+    # env = AddNoiseToGym(env)
+    play(env,keys_to_action=None,zoom=3)
 
 
 
