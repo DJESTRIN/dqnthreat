@@ -21,7 +21,7 @@ import gymnasium as gym
 from gymnasium.utils.play import play
 import numpy as np
 if __name__=='__main__':
-    play(gym.make("ALE/SpaceInvaders-v5", render_mode="rgb_array"), keys_to_action=None)
+    play(gym.make("ALE/SpaceInvaders-v5", render_mode="rgb_array",difficulty=0), keys_to_action=None,zoom=3)
 
 # def make_env(env_id, seed, idx, capture_video, run_name):
 #     if capture_video and idx == 0:
