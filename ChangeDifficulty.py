@@ -5,11 +5,14 @@ import matplotlib.pyplot as plt
 from matplotlib.image import imread as ir
 from gym import ObservationWrapper
 import gymnasium as gym
+from gymnasium.spaces import Box
 import ipdb
 
 class AddNoiseToGym(ObservationWrapper):
     def __init__(self, env):
         super().__init__(env)
+        obs_shape = self.observation_space.shape[:2]
+        self.observation_space = Box(low=0, high=255, shape=obs_shape, dtype=np.uint8)
 
     def observation(self, obsreal):
         try:
