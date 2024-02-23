@@ -11,22 +11,21 @@ import ipdb
 class AddNoiseToGym(ObservationWrapper):
     def __init__(self, env):
         super().__init__(env)
-        gym.utils.RecordConstructorArgs.__init__(self)
-        gym.ObservationWrapper.__init__(self, env)
         obs_shape = self.observation_space.shape[:2]
         self.observation_space = Box(low=0, high=255, shape=obs_shape, dtype=np.uint8)
 
-    def observation(self, obsreal):
-        try:
-            obs,other=obsreal
-            d1,d2,d3=obs.shape #Get observation dimensions
-            noise=np.random.uniform(-1,1,(d1,d2,d3)) #Get an array of noise values [0,1) same shape as observation
-        except:
-            d1,d2=obs.shape #Get observation dimensions
-            noise=np.random.uniform(-1,1,(d1,d2)) #Get an array of noise values [0,1) same shape as observation
-        obs=obs+(15*noise)
-        obs[obs>255]=255
-        obs[obs<0]=0
+    # def observation(self, obsreal):
+    def observation(self, obs):
+        # try:
+        #     obs,other=obsreal
+        #     d1,d2,d3=obs.shape #Get observation dimensions
+        #     noise=np.random.uniform(-1,1,(d1,d2,d3)) #Get an array of noise values [0,1) same shape as observation
+        # except:
+        #     d1,d2=obs.shape #Get observation dimensions
+        #     noise=np.random.uniform(-1,1,(d1,d2)) #Get an array of noise values [0,1) same shape as observation
+        # obs=obs+(15*noise)
+        # obs[obs>255]=255
+        # obs[obs<0]=0
         return obs
 
 
