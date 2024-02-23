@@ -34,8 +34,8 @@ if __name__=='__main__':
     while True:
         #action = env.single_action_space.sample() 
         #env.step(action)
-        env.render()
         env.reset()
+        env.render()
     #play(env,keys_to_action=None,zoom=3)
 
 
