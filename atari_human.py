@@ -20,8 +20,14 @@
 import gymnasium as gym
 from gymnasium.utils.play import play
 import numpy as np
+import argparse
+
+parser = argparse.ArgumentParser()
+parser.add_argument("--diff", type=int,required=True)
+
 if __name__=='__main__':
-    play(gym.make("ALE/SpaceInvaders-v5", render_mode="rgb_array",difficulty=1), keys_to_action=None,zoom=3)
+    args = parser.parse_args()
+    play(gym.make("ALE/SpaceInvaders-v5", render_mode="rgb_array",difficulty=args.diff), keys_to_action=None,zoom=3)
 
 # def make_env(env_id, seed, idx, capture_video, run_name):
 #     if capture_video and idx == 0:
