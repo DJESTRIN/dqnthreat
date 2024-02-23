@@ -35,6 +35,7 @@ if __name__=='__main__':
         #action = env.single_action_space.sample() 
         #env.step(action)
         env.render()
+        env.reset()
     #play(env,keys_to_action=None,zoom=3)
 
 
