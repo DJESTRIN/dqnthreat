@@ -22,6 +22,7 @@ from gymnasium.utils.play import play
 import numpy as np
 from ChangeDifficulty import AddNoiseToGym
 import argparse
+import gymnasium.wrappers import TransformObservation
 
 parser = argparse.ArgumentParser()
 parser.add_argument("--diff", type=int,required=True)
@@ -30,7 +31,8 @@ parser.add_argument("--mode", type=int,required=True)
 if __name__=='__main__':
     args = parser.parse_args()
     env = gym.make("ALE/DemonAttack-v5", render_mode="rgb_array",difficulty=args.diff,mode=args.mode)
-    env = AddNoiseToGym(env)
+    env = TransformationObservation(env, lambda obs: obs + 0.1 * np.random.randn(*obs.shape))
+    # env = AddNoiseToGym(env)
     play(env,keys_to_action=None,zoom=3)
 
 
