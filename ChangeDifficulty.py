@@ -5,6 +5,7 @@ import matplotlib.pyplot as plt
 from matplotlib.image import imread as ir
 from gym import ObservationWrapper
 import gymnasium as gym
+import ipdb
 
 class AddNoiseToGym(ObservationWrapper):
     def __init__(self, env):
@@ -12,6 +13,7 @@ class AddNoiseToGym(ObservationWrapper):
 
     def observation(self, obs):
         try:
+            ipdb.set_trace()
             d1,d2,d3,d4=obs.shape #Get observation dimensions
             noise=np.random.uniform(-1,1,(d1,d2,d3,d4)) #Get an array of noise values [0,1) same shape as observation
         except:
