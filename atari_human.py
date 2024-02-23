@@ -15,7 +15,7 @@ from torch.utils.tensorboard import SummaryWriter
 from random import randrange
 #import Record
 from ChangeDifficulty import ChangeDifficulty
-from gymnasium.utils.play import play
+from gymnasium.utils.play import PlayableGame
 
 def make_env(env_id, seed, idx, capture_video, run_name):
     if capture_video and idx == 0:
@@ -46,4 +46,4 @@ def make_env(env_id, seed, idx, capture_video, run_name):
 
 if __name__=='__main__':
     env = make_env('ALE/SpaceInvaders-v5', 57, 1, False, 'test')
-    play(env, zoom=3)
+    PlayableGame(env, zoom=3)
