@@ -44,4 +44,5 @@ def make_env(env_id, seed, idx, capture_video, run_name):
     
 
 if __name__=='__main__':
-    make_env('ALE/SpaceInvaders-v5', 57, 1, False, 'test')
+    env = make_env('ALE/SpaceInvaders-v5', 57, 1, False, 'test')
+    gym.utils.play.play(env, zoom=3)
