@@ -30,7 +30,7 @@ class AddNoiseToGym(ObservationWrapper):
         return obs
 
 
-class ChangeDifficulty():
+class AddNoiseToObservation():
     def __init__(self,difficulty):
         #Initial difficulty scalar, 0 means no change. S
         self.difficulty=float(difficulty)
@@ -41,15 +41,17 @@ class ChangeDifficulty():
         self.difficulty=float(difficulty)
 
     def modify_observation(self,observation):
-        try:
-            d1,d2,d3,d4=observation.shape #Get observation dimensions
-            noise=np.random.uniform(-1,1,(d1,d2,d3,d4)) #Get an array of noise values [0,1) same shape as observation
-        except:
-            d1,d2=observation.shape #Get observation dimensions
-            noise=np.random.uniform(-1,1,(d1,d2)) #Get an array of noise values [0,1) same shape as observation
-        observation=observation+(self.difficulty*noise) #Update observation using difficulty scalar
-        observation[observation>255]=255
-        observation[observation<0]=0
+        # Adds noise to observation, thereby increasing difficulty.
+        # If difficulty < 0, observation will be a blank screen as a control
+
+        if self.difficulty>0:
+            noise=np.random.uniform(-1,1,observation.shape) #Get an array of noise values [0,1) same shape as observation
+            observation=observation+(self.difficulty*noise) #Update observation using difficulty scalar
+            observation[observation>255]=255
+            observation[observation<0]=0
+        else:
+            #Zero observation to black screen as a control
+            observation = observation - observation
         return observation
     
     def capture_video(self,observation,terminated,drop_folder):
@@ -77,6 +79,7 @@ class ChangeDifficulty():
 
         # Write observation into video
         self.video.write(obs)
+   
 
 def plot_example_difficulties(image_path):
     search_string=image_path+'*.png'
