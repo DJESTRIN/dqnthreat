@@ -3,6 +3,7 @@ import pandas as pd
 import glob
 import matplotlib.pyplot as plt
 import tqdm
+import ipdb
 
 search_string = '/athena/listonlab/scratch/anp4047/difftest7/runs/**/events*'
 tbfiles = glob.glob(search_string)
@@ -12,9 +13,10 @@ for file in tqdm.tqdm(tbfiles):
     event_acc = EventAccumulator(file)
     event_acc.Reload()
     try:
-        df=pd.DataFrame(event_acc.Scalars('charts/episode_length'))
+        df=pd.DataFrame(event_acc.Scalars("charts/episode_length"))
         df=df.rolling(1000).mean()
         if "easy" in file:
+            ipdb.set_trace()
             plt.plot(df["step"],df["value"],'g')
         elif "hard" in file:
             plt.plot(df["step"],df["value"],'r')
