@@ -12,8 +12,8 @@ for file in tqdm.tqdm(tbfiles):
     event_acc = EventAccumulator(file)
     event_acc.Reload()
     try:
-        df=pd.DataFrame(event_acc.Scalars('charts/episodic_return'))
-        df=df.rolling(100).mean()
+        df=pd.DataFrame(event_acc.Scalars('charts/episode_length'))
+        df=df.rolling(1000).mean()
         if "easy" in file:
             plt.plot(df["step"],df["value"],'g')
         elif "hard" in file:
@@ -21,4 +21,4 @@ for file in tqdm.tqdm(tbfiles):
     except:
         print(f'{file} was skipped')
 
-plt.savefig('/home/fs01/dje4001/dqnthreat/diffcomp3.jpg')
+plt.savefig('/home/fs01/dje4001/dqnthreat/diff_test_episode_lengths.jpg')
