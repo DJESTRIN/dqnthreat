@@ -5,7 +5,7 @@ import matplotlib.pyplot as plt
 import tqdm
 import ipdb
 
-search_string = '/athena/listonlab/scratch/anp4047/difftest7/runs/**/events*'
+search_string = '/athena/listonlab/scratch/anp4047/difficulty_tests/diff0vdiff100//runs/**/events*'
 tbfiles = glob.glob(search_string)
 
 plt.figure()
@@ -16,7 +16,7 @@ for file in tqdm.tqdm(tbfiles):
         df=pd.DataFrame(event_acc.Scalars("charts/episode_length"))
         df=df.rolling(1000).mean()
         if "easy" in file:
-            ipdb.set_trace()
+            #ipdb.set_trace()
             plt.plot(df["step"],df["value"],'g')
         elif "hard" in file:
             plt.plot(df["step"],df["value"],'r')
