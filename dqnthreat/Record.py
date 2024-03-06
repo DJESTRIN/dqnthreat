@@ -91,7 +91,8 @@ class ActivationLogger:
         self.output = None
 
     def __call__(self, module, input, output):
-            self.output = output.tolist()
+            # self.output = output.tolist()
+            self.output = input.tolist()
             self.superLogger.checkAddToCSV()
 
 # Analyze Observation, pulls relevant data from current observation for data frame             
@@ -277,7 +278,8 @@ class Record():
         # superLogger will add loggers in correct order
         for name, module in agent.named_modules():
             name = name if name != "" else "no_name_network"
-            module.register_forward_hook(self.superLogger.addLogger())
+            # module.register_forward_hook(self.superLogger.addLogger())
+            module.register_forward_pre_hook(self.superLogger.addLogger())
             layerList.append(name)
         
         layerList.append('enemy_boolean')
