@@ -202,7 +202,7 @@ class AnalyzeObservation():
         return enemy_boolean, attack_boolean, agent_boolean, enemy_distance, attack_distance   
 
 class Record():
-    def __init__(self,seed,output_dir,ilastik_dir,ilp_file):
+    def __init__(self,seed,output_dir,ilastik_dir=None,ilp_file=None):
         self.seed=seed
         
         output_dir = output_dir+'/model_data/'
@@ -223,7 +223,7 @@ class Record():
         self.superLogger = None
 
         # created threat detector object.  
-        self.threat_detector=AnalyzeObservation(ilastik_dir,ilp_file,output_dir)
+        #self.threat_detector=AnalyzeObservation(ilastik_dir,ilp_file,output_dir)
         
     def grab_w_n_b(self,agent,episode):
         """ Saves weight and bias information for each agent as a npy file """
