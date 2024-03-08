@@ -15,6 +15,7 @@ from collections import defaultdict
 import subprocess
 import time
 import math
+import ipdb
 
 # Super Logger is a class to manage ActivationLoggers
 class SuperLogger():
@@ -91,6 +92,7 @@ class ActivationLogger:
         self.output = None
 
     def __call__(self, module, input):
+            ipdb.set_trace()
             # self.output = output.tolist()
             self.output = input.tolist()
             self.superLogger.checkAddToCSV()
