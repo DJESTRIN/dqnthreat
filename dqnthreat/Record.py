@@ -90,7 +90,7 @@ class ActivationLogger:
         self.superLogger = superLogger
         self.output = None
 
-    def __call__(self, module, input, output):
+    def __call__(self, module, input):
             # self.output = output.tolist()
             self.output = input.tolist()
             self.superLogger.checkAddToCSV()
