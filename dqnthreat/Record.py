@@ -54,22 +54,22 @@ class SuperLogger():
                 newRow.append(logger.output)
 
         
-        if self.enemy_boolean == None:
-            return
-        if self.attack_boolean == None:
-            return
-        if self.agent_boolean == None:
-            return
-        if self.enemy_distance == None:
-            return
-        if self.attack_distance == None:
-            return
+        # if self.enemy_boolean == None:
+        #     return
+        # if self.attack_boolean == None:
+        #     return
+        # if self.agent_boolean == None:
+        #     return
+        # if self.enemy_distance == None:
+        #     return
+        # if self.attack_distance == None:
+        #     return
        
-        newRow.append(self.enemy_boolean)
-        newRow.append(self.attack_boolean)
-        newRow.append(self.agent_boolean)
-        newRow.append(self.enemy_distance)
-        newRow.append(self.attack_distance)
+        # newRow.append(self.enemy_boolean)
+        # newRow.append(self.attack_boolean)
+        # newRow.append(self.agent_boolean)
+        # newRow.append(self.enemy_distance)
+        # newRow.append(self.attack_distance)
 
         with open(self.csvFilePath, 'a') as file:
             ipdb.set_trace()
