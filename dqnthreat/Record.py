@@ -49,7 +49,6 @@ class SuperLogger():
         ipdb.set_trace()
         newRow = []
         for logger in self.loggers:
-            ipdb.set_trace()
             if logger.output == None:
                 return
             else:
