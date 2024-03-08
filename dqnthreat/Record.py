@@ -94,8 +94,7 @@ class ActivationLogger:
     def __call__(self, module, input):
             # self.output = output.tolist()
             ipdb.set_trace()
-            input=np.asarray(input)
-            input=input.detach().numpy()
+            input=np.asarray(input[0].detach().numpy())
             self.output = input.tolist()
             self.superLogger.checkAddToCSV()
 
