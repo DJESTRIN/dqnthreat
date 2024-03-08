@@ -94,7 +94,7 @@ class ActivationLogger:
     def __call__(self, module, input):
             # self.output = output.tolist()
             input=np.asarray(input)
-            self.output = input#.tolist()
+            self.output = input.tolist()
             self.superLogger.checkAddToCSV()
 
 # Analyze Observation, pulls relevant data from current observation for data frame             
