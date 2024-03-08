@@ -46,8 +46,10 @@ class SuperLogger():
     def checkAddToCSV(self):
         # If all loggers have an output and observation is recorded, we can place into the csv
         # After placing into csv, we can reset all outputs
+        ipdb.set_trace()
         newRow = []
         for logger in self.loggers:
+            ipdb.set_trace()
             if logger.output == None:
                 return
             else:
