@@ -92,9 +92,9 @@ class ActivationLogger:
         self.output = None
 
     def __call__(self, module, input):
-            ipdb.set_trace()
             # self.output = output.tolist()
-            self.output = input.tolist()
+            input=np.asarray(input)
+            self.output = input#.tolist()
             self.superLogger.checkAddToCSV()
 
 # Analyze Observation, pulls relevant data from current observation for data frame             
